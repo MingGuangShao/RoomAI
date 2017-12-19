@@ -172,9 +172,12 @@ class TexasHoldemEnv(roomai.common.AbstractEnv):
         pe         = self.person_states
         pr         = self.private_state
 
+
+
         if not self.is_action_valid(action, pu, pe[pu.turn]):
             self.logger.critical("action=%s is invalid" % (action.key))
             raise ValueError("action=%s is invalid" % (action.key))
+        pe[pu.turn].__available_actions__ = dict()
 
         if action.option == TexasHoldemAction.Fold:
             self.__action_fold__(action)
@@ -199,7 +202,7 @@ class TexasHoldemEnv(roomai.common.AbstractEnv):
             pu.__public_cards__ = pr.keep_cards[0:5]
             pu.__is_terminal__  = True
             pu.__scores__       = self.__compute_scores__()
-            pe[pu.previous_id].__available_actions__ = dict()
+
 
         # enter into the next stage
         elif TexasHoldemEnv.__is_nextround__(self.public_state):
@@ -220,13 +223,11 @@ class TexasHoldemEnv(roomai.common.AbstractEnv):
 
             pu.__turn__                                             = pu.dealer_id
             pu.__turn__                                             = self.__next_player__(pu)
-            pe[self.public_state.previous_id].__available_actions__ = dict()
             pe[self.public_state.turn].__available_actions__        = self.available_actions(self.public_state, self.person_states[self.public_state.turn])
 
         ##normal
         else:
             pu.__turn__  = self.__next_player__(pu)
-            self.person_states[self.public_state.previous_id].__available_actions__ = dict()
             self.person_states[self.public_state.turn].__available_actions__        = self.available_actions(self.public_state, self.person_states[self.public_state.turn])
 
 

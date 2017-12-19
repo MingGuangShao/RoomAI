@@ -5,6 +5,8 @@ import roomai
 import roomai.common
 logger = roomai.get_logger()
 
+
+
 ######################################################################### Basic Concepts #####################################################
 class AbstractPublicState(object):
     '''
@@ -12,37 +14,48 @@ class AbstractPublicState(object):
     '''
     def __init__(self):
         self.__turn__            = None
-        self.__previous_id__     = None
-        self.__previous_action__ = None
+        self.__action_history__  = []
 
         self.__is_terminal__     = False
         self.__scores__          = None
 
     def __get_turn__(self): return self.__turn__
-    turn = property(__get_turn__, doc = "players[turn] is expected to take an action")
+    turn = property(__get_turn__, doc = "The players[turn] is expected to take an action.")
 
+    def __get_action_history__(self):   return tuple(self.__action_history__)
+    action_history = property(__get_action_history__, doc = "The action_history so far. For example, action_history = [(0, roomai.kuhn.KuhnAction.lookup(\"check\"),(1,roomai.kuhn.KuhnAction.lookup(\"bet\")]")
+
+    ''' 
     def __get_previous_id__(self):  return self.__previous_id__
-    previous_id = property(__get_previous_id__,doc = "players[previous_id] took an action in the previous epoch")
+    previous_id = property(__get_previous_id__,doc = "The players[previous_id] took an action in the previous epoch. In the first epoch, previous_id is None")
 
     def __get_previous_action(self):    return self.__previous_action__
-    previous_action = property(__get_previous_action, doc = "players[previous_id] took previous_action in the previous epoch")
+    previous_action = property(__get_previous_action, doc = "The players[previous_id] took previous_action in the previous epoch. In the first epoch, previous_action is None")
+    '''
 
     def __get_is_terminal__(self):   return  self.__is_terminal__
-    is_terminal = property(__get_is_terminal__,doc = "is_terminal = true means the game is over. At this time, scores is not None, scores = [float0,float1,...] for player0, player1,..")
+    is_terminal = property(__get_is_terminal__,doc = "is_terminal = True means the game is over. At this time, scores is not None, scores = [float0,float1,...] for player0, player1,... For example, scores = [-1,2,-1].\n"
+                                                     "is_terminal = False, the scores is None.")
 
     def __get_scores__(self):   return self.__scores__
-    scores = property(__get_scores__, doc = "is_terminal = true means the game is over. At this time, scores is not None, scores = [float0,float1,...] for player0, player1,..")
+    scores = property(__get_scores__, doc = "is_terminal = True means the game is over. At this time, scores is not None, scores = [float0,float1,...] for player0, player1,... For example, scores = [-1,3,-2].\n"
+                                            "is_terminal = False, the scores is None.")
 
     def __deepcopy__(self, memodict={}, newinstance = None):
         if newinstance is None:
             newinstance = AbstractPublicState()
 
-        newinstance.__turn__ = self.__turn__
+        newinstance.__turn__           = self.__turn__
+        newinstance.__action_history__ = list(self.__action_history__)
+        '''
         newinstance.__previous_id__= self.__previous_id__
         if self.__previous_action__ is not None:
             newinstance.__previous_action__ = self.previous_action.__deepcopy__()
         else:
             newinstance.__previous_action__ = None
+        '''
+
+
         newinstance.__is_terminal__ = self.is_terminal
         if self.scores is None:
             newinstance.__scores__ = None
@@ -103,8 +116,8 @@ class Info(object):
     def __deepcopy__(self, memodict={}, newinstance = None):
         if newinstance is None:
             newinstance = Info()
-        newinstance.__public_state__ = self.__public_state.__deepcopy__()
-        newinstance.__public_state__ = self.__person_state.__deepcopy__()
+        newinstance.__public_state__  = self.__public_state.__deepcopy__()
+        newinstance.__personc_state__ = self.__person_state.__deepcopy__()
         return newinstance
 
 class AbstractAction(object):
@@ -190,22 +203,26 @@ class AbstractEnv(object):
 
     def __init__(self):
         self.__params__ = dict()
-        self.__infos__ = None
         self.__public_state_history__  = []
-        self.__person_states_history__  = []
+        self.__person_states_history__ = []
         self.__private_state_history__ = []
+
+        self.public_state  = AbstractPublicState()
+        self.person_states = [AbstractPersonState()]
+        self.private_state = AbstractPrivateState()
+
+
 
     def __gen_infos__(self):
 
         num_players = len(self.person_states)
-        if self.__infos__ is None:
-            self.__infos__  = [Info() for i in range(num_players)]
+        __infos__   = [Info() for i in range(num_players)]
 
         for i in range(num_players):
-            self.__infos__[i].__person_state__ = self.person_states[i]#.__deepcopy__()
-            self.__infos__[i].__public_state__ = self.public_state#.__deepcopy__()
+            __infos__[i].__person_state__ = self.person_states[i]#.__deepcopy__()
+            __infos__[i].__public_state__ = self.public_state#.__deepcopy__()
 
-        return tuple(self.__infos__)
+        return tuple(__infos__)
 
 
     def __gen_history__(self):
@@ -261,6 +278,24 @@ class AbstractEnv(object):
 
         infos  = self.__gen_infos__()
         return infos, self.public_state, self.person_states, self.private_state
+
+    def __deepcopy__(self, memodict={}, newinstance = None):
+        if newinstance is None:
+            newinstance = AbstractEnv()
+        newinstance.__params__ = dict(self.__params__)
+        newinstance.private_state = self.private_state.__deepcopy__()
+        newinstance.public_state  = self.public_state.__deepcopy__()
+        newinstance.person_states = [pe.__deepcopy__() for pe in self.person_states]
+
+        newinstance.__private_state_history__ = [pr.__deepcopy__() for pr in self.__private_state_history__]
+        newinstance.__public_state_history__  = [pu.__deepcopy__() for pu in self.__public_state_history__]
+        newinstance.__person_states_history__ = []
+        if len(self.person_states) > 0:
+            for i in range(len(self.person_states)):
+                newinstance.__person_states_history__.append([pe.__deepcopy__() for pe in self.__person_states_history__[i]])
+
+        return newinstance
+
 
     ### provide some util functions
     @classmethod
@@ -340,19 +375,19 @@ class PokerCard(object):
             if isinstance(suit, str):
                 suit1 = suit_str_to_rank[suit]
 
-        self.__point_str__  = point_rank_to_str[point1]
-        self.__suit_str__   = suit_rank_to_str[suit1]
+        self.__point__  = point_rank_to_str[point1]
+        self.__suit__   = suit_rank_to_str[suit1]
         self.__point_rank__ = point1
         self.__suit_rank__  = suit1
-        self.__key__        = "%s_%s" % (self.__point_str__, self.__suit_str__)
+        self.__key__        = "%s_%s" % (self.__point__, self.__suit__)
 
 
     def __get_point_str__(self):
-        return self.__point_str__
+        return self.__point__
     point = property(__get_point_str__, doc="The point of the poker card")
 
     def __get_suit_str__(self):
-        return self.__suit_str__
+        return self.__suit__
     suit = property(__get_suit_str__, doc="The suit of the poker card")
 
     def __get_point_rank__(self):
@@ -428,5 +463,4 @@ def version():
 class FrozenDict(dict):
     def __setitem__(self, key, value):
         raise NotImplementedError("The FrozenDict doesn't support the __setitem__ function")
-
 

@@ -4,9 +4,11 @@ import sys;
 
 project_name = "roomai";
 
+'%(asctime)s|process:%(process)d|filename:%(filename)s|lineNum:%(lineno)d|level:%(levelno)s|log_msg:%(message)s'
+
 logger = logging.getLogger(project_name);
 handler = logging.StreamHandler(sys.stderr);
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s");
+formatter = logging.Formatter("%(asctime)s - line %(lineno)d in %(filename)s - %(levelname)s - %(message)s");
 
 logger.setLevel(logging.INFO);
 handler.setLevel(logging.INFO);
@@ -15,29 +17,30 @@ logger.addHandler(handler);
 
 
 def set_level(level):
-    """
-
-    Args:
-        level:
-    """
+    '''
+    set the level of log
+    
+    :param level: 
+    :return: 
+    '''
     logger.setLevel(level)
     handler.setLevel(level)
 
 def get_logger():
-    """
-
-    Returns:
-
-    """
+    '''
+    get the logger
+    
+    :return: 
+    '''
     return logger
 
 
 def init_logger(opts):
-    """
-
-    Args:
-        opts:
-    """
+    '''
+    
+    :param opts: 
+    :return: 
+    '''
     global logger;
     global handler;
     global project_name;

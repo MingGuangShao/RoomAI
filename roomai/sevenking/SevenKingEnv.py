@@ -71,8 +71,6 @@ class SevenKingEnv(roomai.common.AbstractEnv):
         self.public_state.__turn__,_          = self.__choose_player_with_lowest_card__()
         self.public_state.__is_terminal__     = False
         self.public_state.__scores__          = []
-        self.public_state.__previous_id__     = None
-        self.public_state.__previous_action__ = None
         self.public_state.__license_action__  = SevenKingAction.lookup("")
         self.public_state.__stage__           = 0
 
@@ -107,6 +105,9 @@ class SevenKingEnv(roomai.common.AbstractEnv):
         if self.is_action_valid(action,pu, pes[turn]) == False:
             raise  ValueError("The (%s) is an invalid action " % (action.key))
 
+        pes[pu.turn].__available_actions__ = dict()
+        pu.__action_history__.append((pu.turn,action))
+
         ## the action plays its role
         if action.pattern[0] == "p_0":
             pu.__is_fold__[turn]           = True
@@ -114,7 +115,6 @@ class SevenKingEnv(roomai.common.AbstractEnv):
             pes[turn].__available_actions__ = dict()
         else:
             pes[turn].__del_cards__(action.cards)
-
             if pu.stage == 0:
                 tmp = []
                 for i in range(5 - len(pes[turn].hand_cards)):
@@ -124,10 +124,6 @@ class SevenKingEnv(roomai.common.AbstractEnv):
             elif pu.stage == 1:
                 pu.__num_hand_cards__[turn] = len(pes[turn].hand_cards)
 
-            pes[turn].__available_actions__ = dict()
-
-        pu.__previous_id__     = turn
-        pu.__previous_action__ = action
         if action.pattern[0] != "p_0":
             pu.__license_action__ = action
 

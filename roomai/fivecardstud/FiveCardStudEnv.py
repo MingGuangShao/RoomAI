@@ -135,6 +135,7 @@ class FiveCardStudEnv(roomai.common.AbstractEnv):
         pu = self.public_state
         pe = self.person_states
         pr = self.private_state
+        pe[pu.turn].__available_actions__ = dict()
 
         if action.option == FiveCardStudAction.Fold:
             self.action_fold(action)
@@ -150,8 +151,9 @@ class FiveCardStudEnv(roomai.common.AbstractEnv):
             self.action_bet(action)
         else:
             raise Exception("action.option(%s) not in [Fold, Check_, Call, Raise, Showhand, Bet]" % (action.option))
-        pu.previous_id     = pu.turn
-        pu.previous_action = action
+        ##pu.previous_id     = pu.turn
+        #pu.previous_action = action
+        pu.__action_history__.append((pu.turn, action))
         pu.previous_round  = pu.round
 
         # computing_score
@@ -180,7 +182,6 @@ class FiveCardStudEnv(roomai.common.AbstractEnv):
                 pe[i].fifth_hand_card  = pr.all_hand_cards[4 * num_players + i]
 
             pu.turn                              = None
-            pe[pu.previous_id].available_actions = None
 
         # enter into the next stage
         elif FiveCardStudEnv.is_nextround(self.public_state):
@@ -211,12 +212,10 @@ class FiveCardStudEnv(roomai.common.AbstractEnv):
                 pu.is_raise[i]            = False
             pu.num_raise = 0
 
-            pe[pu.previous_id].available_actions = None
             pe[pu.turn].available_actions        = FiveCardStudEnv.available_actions(pu, pe[pu.turn])
 
         else:
             pu.turn                              = self.next_player(pu)
-            pe[pu.previous_id].available_actions = None
             pe[pu.turn].available_actions        = FiveCardStudEnv.available_actions(pu, pe[pu.turn])
 
 

@@ -11,13 +11,13 @@ for action_key in actions:
           ",".join([str(s) for s in actions[action_key].slaveCards])+"\t" +\
           actions[action_key].pattern[0]+"',")
 action = roomai.doudizhu.DouDiZhuPokerAction([roomai.doudizhu.DouDiZhuActionElement.str_to_rank["x"]],[])
-print (","+action.key + "\t" + \
+print ("'"+action.key + "\t" + \
       ",".join([str(s) for s in action.masterCards]) + "\t" + \
       ",".join([str(s) for s in action.slaveCards]) + "\t" + \
       action.pattern[0]+"',")
 
 action = roomai.doudizhu.DouDiZhuPokerAction([roomai.doudizhu.DouDiZhuActionElement.str_to_rank["b"]],[])
-print (","+action.key + "\t" + \
+print ("'"+action.key + "\t" + \
       ",".join([str(s) for s in action.masterCards]) + "\t" + \
       ",".join([str(s) for s in action.slaveCards]) + "\t" + \
       action.pattern[0]+"']")

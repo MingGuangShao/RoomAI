@@ -3,7 +3,7 @@ import random
 
 from algorithms import CRMAlgorithm
 from algorithms import CRMPlayer
-from roomai.kuhn import KuhnPokerAlwaysBetPlayer
+from roomai.kuhn import Example_KuhnPokerAlwaysBetPlayer
 from roomai.kuhn import KuhnPokerEnv
 from roomai.kuhn import KuhnPokerRandomPlayer
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     print sum_scores
 
 
-    player_alwaysbet = KuhnPokerAlwaysBetPlayer()
+    player_alwaysbet = Example_KuhnPokerAlwaysBetPlayer()
     sum_scores = [0.0,0.0]
     num        = 0
     for i in range(10000):

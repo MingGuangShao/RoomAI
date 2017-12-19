@@ -34,7 +34,7 @@ class KuhnPokerExamplePlayer(roomai.common.AbstractPlayer):
             
     #@override
     def take_action(self):
-        return self.available_actions.values()[int(random.random() * len(self.available_actions))]
+        return list(self.available_actions.values())[int(random.random() * len(self.available_actions))]
         
     #@overide
     def reset(self):
