@@ -21,7 +21,7 @@ class ThreeKingAction(roomai.common.AbstractAction):
 
         if len(key) > 0:
             action_info = self.key.split(',')
-            self.__skill__ = self.threeking.ThreeKingSkills.lookup(action_info[0])
+            self.__skill__ = roomai.threeking.ThreeKingSkills.lookup(action_info[0])
 
             if self.__skill__.name in []:#implement your code here!
                 self.__key__ = self.__skill__.name
