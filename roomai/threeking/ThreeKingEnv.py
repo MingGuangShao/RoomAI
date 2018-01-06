@@ -106,4 +106,26 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         infos = self.gen_infos__()
         return infos, self.public_state, self.person_states, self.private_state
 
+    def forward(self, action):
+        '''
+        The ThreeKing game environment steps with the action taken by the current player
+        :param action:
+        :return:
+        '''
+        pu = self.public_state
+        pr = self.private_state
+        pes = self.person_state
+        trun = pu.turn
+
+        if self.is_action_valid(action, pu, pes[turn]) == False: #implement code here!
+            raise ValueError("The (%s) is an invalid action " % (action.key))
+        
+        if self.is_next_state() == True:
+            #implement your code here!
+        
+        self.change_state()#implement you code here!
+        '''
+        ThreeKingSkills.NANMAN(pu,action)#
+        '''
+
 
