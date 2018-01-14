@@ -125,7 +125,29 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         
         self.change_state()#implement you code here!
         '''
-        ThreeKingSkills.NANMAN(pu,action)#
+        ThreeKingSkills.take_action(pu,pr,pes,action)# action is an object
         '''
 
+    def complete(cls, env, players):
+        '''
+        use the game environment to hold a complete for the players
+        
+        :param env: The game environment 
+        :param players: The players
+        :return: scores for the players
+        '''
+        mun_players = len(players)
+        infos, public_state, person_states, private_state = env.init({"num_players":num_players})
 
+        for i in range(env.__params__["num_players"]):
+            players[i].receive_info(infos[i])
+
+        while public_state.is_terminal == False:
+            turn    = public_state.turn
+            action  = players[turn].take_action()
+            infos, public_state, person_states, private_state = env.forward(action)
+
+            for i in range(env.__params__["num_players"]):
+                players[i].receive_info(infos[i])
+
+        #return implement code here!
