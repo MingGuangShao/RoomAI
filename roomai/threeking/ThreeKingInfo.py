@@ -5,34 +5,38 @@ from roomai.threeking import ThreeKingPorkerCard
 class ThreeKingPublicState(roomai.common.AbstractPublicState):
 	def __init__(self):
 		super(ThreeKingPublicState,self).__init__()
-		self.__stage__			        = None
-		self.__state__			        = None
-		self.__lord_id__	            = None
-		self.__num_players__	        = None
-		self.__players__	            = None
-		self.__num_discard_cards__	    = None
-		self.__discard_cards__		    = None
-		self.__num_deposit_cards__	    = None
-		self.__deposit_cards__		    = None
-		self.__num__equipment_cards__	= None
-		self.__equipment_cards__		= None
-		self.__num_fate_zone_cards__	= None
-		self.__fate_zone_cards__		= None
-		self.__num_hand_cards__			= None
-        self.__num_keep_cards__         = None
-        self.__is_fold__                = None
-        self.__num_fold__               = None
-		self.__license_action__			= None
+        
+        self.__turn__                               = None
+		self.__stage__			                    = None
+		self.__state__			                    = None
+        self.__turn__                               = None
+        self.__previous_id__                        = None
+        self.__previous_skill__                     = None
+        self.__previous_action__                    = None
+
+		self.__lord_id__	                        = None
+		self.__num_players__	                    = None
+		self.__num_discard_cards__	                = None
+		self.__discard_cards__		                = None
+		self.__num_deposit_cards__	                = None
+		self.__deposit_cards__		                = None
+		self.__num__equipment_cards__	            = None
+		self.__equipment_cards__		            = None
+		self.__num_fate_zone_cards__	            = None
+		self.__fate_zone_cards__		            = None
+		self.__num_hand_cards__			            = None
+        self.__num_keep_cards__                     = None
+		self.__license_action__			            = None
 		
 		
 		def __get__stage__(self): return self.__stage__
-		stage = property(__get_stage__, doc="There are two stage in ThreeKing. In the first stage(stage = 0), the player gets the same number of the poker cards after he takes an action (some actions)."+ "In the second stage (stage=1), the player doesn't get the suplemment.")
+		stage = property(__get_stage__, doc="There are two stage in ThreeKing.")
 		
 		def __get_state__(self):
 			if self.__state__ is None:
 				return None
 			return tuple(self.__state__)
-		state = property(__get_state__, doc=" There are six states in ThreeKing for each player. state=['LiuBei',0]"
+		state = property(__get_state__, doc=""
 
 		def __get_lord_id__(self): return self.__lord_id__
 		lord_id = property(__get_lord_id__, doc="lord_id= 1")
@@ -100,16 +104,6 @@ class ThreeKingPublicState(roomai.common.AbstractPublicState):
 			return tuple(self.__num_keep_cards__)
 		num_keep_cards = property(__get_num_keep_cards__, doc="num_keep_cards = 12 denotes 12 cards in keep zone ...")
         
-        def __get_is_fold__(self):
-            if self.__is_fold__ is None:
-                return None
-            return tuple(self.__is_fold__)
-        is_fold = property(__get_is_fold__, doc="is_fold is an array of which player has take the fold action."
-
-        def __get_num_fold__(self):
-            return self.__num_fold__
-        num_fold = property(__get_num_fold__, doc="The number of players who has taken the fold action"
-
 		def __get_license_action__(self):
        		return self.__license_action__
     	license_action = property(__get_license_action__, doc="Generally, the player need takes an action with the same pattern as the license action...")
@@ -144,9 +138,8 @@ class ThreekingPersonState(roomai.common.AbstractPersonState):
 	The person state of ThreeKing
 	'''
 	def __init__(self):
-		super(ThreeKingPersonState,self).__init__()
-		self.__role_id__ 	            = None
-		self.__hand_cards__		        = []
+		super(ThreeKingPersonState,self).__init__()self.__role_id__ 	            = None
+	    self.__role__                   = None
 		self.__hand_cards_keyset__		= set()
 		self.__hand_cards_key__			= ""
 	
