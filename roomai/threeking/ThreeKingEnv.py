@@ -25,17 +25,15 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         #3) player_name: players(heros) name
         #4) player_role: players(heros) role
         3) players_info: players (heros) name and role
-        #An example of the initialization param is {"player_name":['','','',''],"player_role":['','','',''],"record_history":True}
-        AN example of the initialization param is {"players_info":[['','','','',],['','','','']],"record_history":True}
         '''
         #player_name and player_role and parameter is valid
         #implement you code!
 
         if "players" in params:
             self.__params__["players_info"] = params["palyers_info"]
-            self.__params__["num_players"] = len(params["players_info][0])"
+            self.__params__["num_players"] = len(params["players_info])"
         else:
-            self.__params__["players_info"] = [['LiuBei','MaChao','ZhaoYun','SiMaYi','ZhangLiao','XuChu','XiaHouDun','SunSHangXiaNG'],['lord','minister','minister','rebel','rebel','rebel','spy','spy']]
+            self.__params__["players_info"] = [['LiuBei','lord'],['MaChao','minister'],['ZhaoYun','minister'],['SiMaYi','rebel'],['ZhangLiao','rebel'],['XuChu','rebel'],['XiaHouDun','spy'],['SunSHangXiaNG','spy']]
 
             self.__params__["num_players"] = 8
 
@@ -60,50 +58,64 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
         self.public_state_history = []
         self.private_state_history = []
-        self.person_states_history = []
+        self.person_state_history = []
 
         ##private_state
-        self.private_state.__keep_cards__ = allcards ## it means?
+        self.private_state.__keep_cards__ = allcards ## it means?##check more!!!
         
         for i in range(self.__params__["num_players"l]):
             tmp = []
             for j in range(4):
             # in this part, some an hero can get more cards
             # implement your code!
-                c = self.private_state.__keep__cards__.pop()
+                c = self.private_state.__keep__cards__.pop() ## check more !!!
                 tmp.append(c)
             self.person_states[i].__add_cards__(tmp)
 
-        ##public_state
-        self.public_state.__turn__                  = #implement code here!
-        self.public_state.__is_terminal__           = False
-        self.public_state.__previous_id__           = None
-        self.public_state.__previous_action__       = None
-        self.public_state.__licenes_action__        = ThreeKingAction.lookup("")
+        ##init public_state
+        self.public_state.__stage__                 = True
 
-        self.public_state.__stage__                 = 0#implement code here!
-        self.public_state.__state__                 = [self.__params__["players"][0][0],0]
-        self.public_state.__lord_id__               = #implement code here!
+        self.public_state.__previous_id__           = -1 #-1
+        self.public_state.__previous_skill__        = None
+        self.public_state.__previous_action__       = None
+        self.public_state.__licenes_action__        = ThreeKingAction.lookup("")# it means ??????
+        self.public_state.__lord_id__               = i  for i in range(self.__params__['num_players']) if self.__params__['player_info'][i][1] == 'lord'
         self.public_state.__num_players__           = self.__params__["num_players"]
-        self.public_state.__players__               = #implement code here! each player is an object
         self.public_state.__num_discard_cards__     = 0
         self.public_state.__num_deposit_cards__     = 0
         self.public_state.__num_equipment_cards__   = 0
         self.public_state.__num_fate_zone_cards__   = 0
         self.public_state.__num_hand_cards__        = [len(person_state.hand_cards) for person_state in self.person_states]
         self.public_state.__num_keep_cards__        = len(self.private_state.keep_cards)
-        self.public_state.__is_fold__               = [False for i in range(self.public_state.num_players)]
-        self.public_state.__num_fold__              = 0
 
-        ##person_state
-        #change the code! and implement code here!
+        # init self.public_state.__turn__        
+        self.public_state.__turn__                  = self.public_state.__lord__id__
+
+        # init self.public_state.__state__
+        for info in self.__params__["players_info"]:
+            name            = info[0]
+            alive           = 1
+            peroid          = 0 if info[1] == 'lord' else -1
+            hp              = get_hp(name)#implement your code here!
+            max_hp          = hp
+            sex             = get_sex(name)#implement your code here!
+            attack          = get_attack_distance(name)
+            defend          = get_defend_distance(name)
+            
+            tmp             = {'name':name,'alive':alive,'state':state,'hp':hp,'sex':sex,'attack':attack,'defend':defend}
+
+            self.public_state.__state__.append(tmp)
+            
+        # init self.person_state.__role__
         for i in range(self.__params__["num_players"]):
-            self.person_states[i].__role_id__    = i
+            self.person_states[i].__role__    = self.__params__["players_info"][i][1]
+
             if i == self.public_state.trun:
                 self.person_states[i].__avaliable_actions__ =  ThreeKingEnv.avaliable_actions(self.public_states, self.person_states[i]) 
             
-        self.__gen_history__()
-        infos = self.gen_infos__()
+        self.__gen_history__()# it means?
+        infos = self.gen_infos__()# it means?
+
         return infos, self.public_state, self.person_states, self.private_state
 
     def forward(self, action):
@@ -120,9 +132,6 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         if self.is_action_valid(action, pu, pes[turn]) == False: #implement code here!
             raise ValueError("The (%s) is an invalid action " % (action.key))
         
-        if self.is_next_state() == True:
-            #implement your code here!
-        
         self.change_state()#implement you code here!
         '''
         ThreeKingSkills.take_action(pu,pr,pes,action)# action is an object
@@ -137,12 +146,12 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         :return: scores for the players
         '''
         mun_players = len(players)
-        infos, public_state, person_states, private_state = env.init({"num_players":num_players})
+        infos, public_state, person_states, private_state = env.init()#implement your code here
 
         for i in range(env.__params__["num_players"]):
             players[i].receive_info(infos[i])
 
-        while public_state.is_terminal == False:
+        while public_state.stage == False:
             turn    = public_state.turn
             action  = players[turn].take_action()
             infos, public_state, person_states, private_state = env.forward(action)
