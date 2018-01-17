@@ -26,83 +26,83 @@ class ThreeKingPublicState(roomai.common.AbstractPublicState):
         self.__num_keep_cards__                     = None
 		
 		
-		def __get__terminal__(self): return self.__terminal__
-		terminal = property(__get_terminal__, doc="Is terminal?")
+        def __get__terminal__(self): return self.__terminal__
+        terminal = property(__get_terminal__, doc="Is terminal?")
 
-		def __get_state__(self):
-			if self.__state__ is None:
-				return None
-			return tuple(self.__state__)
-		state = property(__get_state__, doc="")
+        def __get_state__(self):
+            if self.__state__ is None:
+                return None
+            return tuple(self.__state__)
+        state = property(__get_state__, doc="")
 
-		def __get_turn__(self): return self.__turn__
-		turn = property(__get_turn__, doc="")
+        def __get_turn__(self): return self.__turn__
+        turn = property(__get_turn__, doc="")
 
-		def __get_previous_id__(self): return self.__previous_id__
-		previous_id = property(__get_previous_id__, doc="")
+        def __get_previous_id__(self): return self.__previous_id__
+        previous_id = property(__get_previous_id__, doc="")
 
-		def __get_previous_action__(self): return self.__previous_action__
-		previous_action = property(__get_previous_action__, doc="")
+        def __get_previous_action__(self): return self.__previous_action__
+        previous_action = property(__get_previous_action__, doc="")
 
-		def __get_lord_id__(self): return self.__lord_id__
-		lord_id = property(__get_lord_id__, doc="lord_id= 1")
+        def __get_lord_id__(self): return self.__lord_id__
+        lord_id = property(__get_lord_id__, doc="lord_id= 1")
 
-		def __get_num_players__(self): return self.__num_players__
-		num_players = property(__get_num_players__, doc="num_players = 4 denotes the number of players in this game")
+        def __get_num_players__(self): return self.__num_players__
+        num_players = property(__get_num_players__, doc="num_players = 4 denotes the number of players in this game")
 		
-		def __get_discard_cards__(self):
-			if self.__discard_cards__ is None:
-				return None
-			return tuple(self.__discard_cards__)
-		discard_cards = property(__get_discard_cards__, doc="discard_cards = [roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]")
+        def __get_discard_cards__(self):
+            if self.__discard_cards__ is None:
+                return None
+            return tuple(self.__discard_cards__)
+        discard_cards = property(__get_discard_cards__, doc="discard_cards = [roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]")
 
-		def __get_num_discard_cards__(self): return self.__num_discard_cards__
-		num_discard_cards = property(__get_num_discard_cards__, doc="num_discard_cards = 10")
+        def __get_num_discard_cards__(self): return self.__num_discard_cards__
+        num_discard_cards = property(__get_num_discard_cards__, doc="num_discard_cards = 10")
 
-		def __get_deposit_cards__(self):
-			if self.__deposit_cards__ is None:
-				return None
-			return tuple(self.__deposit_cards__)
-		deposit_cards = property(__get_deposit_cards__, doc="deposit_cards = [roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]")
+        def __get_deposit_cards__(self):
+            if self.__deposit_cards__ is None:
+                return None
+            return tuple(self.__deposit_cards__)
+        deposit_cards = property(__get_deposit_cards__, doc="deposit_cards = [roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]")
 
-		def __get_num_deposit_cards__(self): return self.__num_deposit_cards__
-		num_deposite_cards = property(__get_num_deposit_cards__, doc="num_deposite_cards = 10")
+        def __get_num_deposit_cards__(self): return self.__num_deposit_cards__
+        num_deposite_cards = property(__get_num_deposit_cards__, doc="num_deposite_cards = 10")
 
-		def __get_equipment_cards__(self):
-			if self.__equipment_cards__ is None:
-				return None
-			return tuple(self.__equipment_cards__)
-		equipment_cards = property(__get_equipment_cards__, doc="quipment_cards = [[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...],[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]] denotes the players0......")
+        def __get_equipment_cards__(self):
+            if self.__equipment_cards__ is None:
+                return None
+            return tuple(self.__equipment_cards__)
+        equipment_cards = property(__get_equipment_cards__, doc="quipment_cards = [[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...],[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]] denotes the players0......")
 
-		def __get_num_equipment_cards__(self):
-			if self.__num_equipment_cards__ is None:
-				return None
-			return tuple(self.__num_equipment_cards__)
-		num_equipment_cards = property(__get_num_equipment_cards__, doc="num_equipment_cards = [3,5,2] denotes the player0 has 3 cards in equipment zone.")
+        def __get_num_equipment_cards__(self):
+            if self.__num_equipment_cards__ is None:
+                return None
+            return tuple(self.__num_equipment_cards__)
+        num_equipment_cards = property(__get_num_equipment_cards__, doc="num_equipment_cards = [3,5,2] denotes the player0 has 3 cards in equipment zone.")
 
-		def __get_fate_zone_cards__(self):
-			if self.__fate_zone_cards__ is None:
-				return None
-			return tuple(self.__fate_zone_cards__)
-			fate_zone_cards = property(__get_fate_zone_cards__, doc="fate_zone_cards = [[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...],[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]] denotes the players0......")
+        def __get_fate_zone_cards__(self):
+            if self.__fate_zone_cards__ is None:
+                return None
+            return tuple(self.__fate_zone_cards__)
+        fate_zone_cards = property(__get_fate_zone_cards__, doc="fate_zone_cards = [[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...],[roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]] denotes the players0......")
 
-		def __get_num_fate_zone_cards__(self):
-			if self.__num_fate_zone_cards__ is None:
-				return None
-			return tuple(self.__num_fate_zone_cards__)
-			num_fate_zone_cards = property(__get_num_fate_zone_cards__, doc="num_fate_zone_cards = [0,1,0] denotes the player0 has 0 card in fate zone, player1 has ...")
+        def __get_num_fate_zone_cards__(self):
+            if self.__num_fate_zone_cards__ is None:
+                return None
+            return tuple(self.__num_fate_zone_cards__)
+        num_fate_zone_cards = property(__get_num_fate_zone_cards__, doc="num_fate_zone_cards = [0,1,0] denotes the player0 has 0 card in fate zone, player1 has ...")
 	
-		def __get_num_hand_cards__(self):
-			if self.__num_hand_cards__ is None:
-				return None
-			return tuple(self.__num_hand_cards__)
-		num_hand_cards = property(__get_num_hand_cards__, doc="num_hand_cards = [3,5,2] denotes the players0 3 cards in hand, player1 has ...")
+        def __get_num_hand_cards__(self):
+            if self.__num_hand_cards__ is None:
+                return None
+            return tuple(self.__num_hand_cards__)
+        num_hand_cards = property(__get_num_hand_cards__, doc="num_hand_cards = [3,5,2] denotes the players0 3 cards in hand, player1 has ...")
 
-		def __get_num_keep_cards__(self):
-			if self.__num_keep_cards__ is None:
-				return None
-			return tuple(self.__num_keep_cards__)
-		num_keep_cards = property(__get_num_keep_cards__, doc="num_keep_cards = 12 denotes 12 cards in keep zone ...")
+        def __get_num_keep_cards__(self):
+            if self.__num_keep_cards__ is None:
+                return None
+            return tuple(self.__num_keep_cards__)
+        num_keep_cards = property(__get_num_keep_cards__, doc="num_keep_cards = 12 denotes 12 cards in keep zone ...")
         
 
 
