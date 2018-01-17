@@ -12,7 +12,7 @@ import roomai.threeking
 
 logger = roomai.get_logger()
 
-player_info = {'LiuBei':(4,1,['RenDe','JiJiang']),'MaChao':(4,1,['MaShu','TieQi']),'ZhaoYun':(4,1,['LongDan','YaJiao']),'SiMaYi':(4,1,['FanKui','GuiCai']),'ZhangLiao':(4,1,['TuXi']),'XuChu':(4,1,['LuoYi']),'XiaHouDun':(4,1,['GangLie','QingJian']),'SunSHangXiaNG':(4,1,['JieYin','XiaoJi'])}
+player_info = {'LiuBei':(4,1,['RenDe','JiJiang']),'MaChao':(4,1,['MaShu','TieQi']),'ZhaoYun':(4,1,['LongDan','YaJiao']),'SiMaYi':(3,1,['FanKui','GuiCai']),'ZhangLiao':(4,1,['TuXi']),'XuChu':(4,1,['LuoYi']),'XiaHouDun':(4,1,['GangLie','QingJian']),'SunSHangXiaNG':(3,0,['JieYin','XiaoJi'])}
 
 
 class ThreeKingEnv(roomai.common.AbstractEnv):
@@ -98,9 +98,9 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             name            = info[0]
             alive           = 1
             peroid          = 0 if info[1] == 'lord' else -1
-            hp              = self.player[name][0]#implement your code here!
+            hp              = self.player[name][0] + 1 if info[1] == 'lord' else self.player[name][0]
             max_hp          = hp
-            sex             = self.player[name][1]#implement your code here!
+            sex             = self.player[name][1]
             attack          = 1
             defend          = 1
             skill           = self.player[name][2]
