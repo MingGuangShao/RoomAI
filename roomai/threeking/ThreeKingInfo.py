@@ -1,28 +1,27 @@
-#!/bin/python
 import roomai.common
-from roomai.threeking import ThreeKingPorkerCard
+from roomai.threeking.ThreeKingUtils import ThreeKingPokerCard
 
 class ThreeKingPublicState(roomai.common.AbstractPublicState):
     def __init__(self):
         super(ThreeKingPublicState,self).__init__()
         
         self.__terminal__                           = None
-        self.__state__			                    = None
+        self.__state__			            = None
         self.__turn__                               = None
         self.__previous_id__                        = None
         self.__previous_action__                    = None
 
-        self.__lord_id__	                        = None
+        self.__lord_id__	                    = None
         self.__num_players__	                    = None
-        self.__num_discard_cards__	                = None
-        self.__discard_cards__		                = None
-        self.__num_deposit_cards__	                = None
-        self.__deposit_cards__		                = None
+        self.__num_discard_cards__	            = None
+        self.__discard_cards__		            = None
+        self.__num_deposit_cards__	            = None
+        self.__deposit_cards__		            = None
         self.__num__equipment_cards__	            = None
-        self.__equipment_cards__		            = None
+        self.__equipment_cards__		    = None
         self.__num_fate_zone_cards__	            = None
-        self.__fate_zone_cards__		            = None
-        self.__num_hand_cards__			            = None
+        self.__fate_zone_cards__		    = None
+        self.__num_hand_cards__			    = None
         self.__num_keep_cards__                     = None
 		
 		
@@ -128,57 +127,57 @@ class ThreeKingPrivateState(roomai.common.AbstractPrivateState):
 
 
 		
-class ThreekingPersonState(roomai.common.AbstractPersonState):
+class ThreeKingPersonState(roomai.common.AbstractPersonState):
 	'''
 	The person state of ThreeKing
 	'''
 	def __init__(self):
-		super(ThreeKingPersonState,self).__init__()
+	    super(ThreeKingPersonState,self).__init__()
 	    self.__role__                   = None
-		self.__hand_cards_keyset__		= set()
-		self.__hand_cards_key__			= ""
+	    self.__hand_cards_keyset__	    = set()
+	    self.__hand_cards_key__	    = ""
 	
 	def __get_hand_cards__(self):
-		return tuple(self.__hand_cards__)
+	    return tuple(self.__hand_cards__)
 	hand_cards = property(__get_hand_cards__, doc="hand_cards = [roomai.threeking.ThreeKingPokerCards.lookup(\" \"), ...]")
 	
 	def __get_hand_cards_key__(self):
-		return self.__hand_cards_key__
-	hand_cards_key = property(self.__get_hand_cards_keyset__, doc="hand_cards_key = \" \"")
+	    return self.__hand_cards_key__
+	hand_cards_key = property(__get_hand_cards_key__, doc="hand_cards_key = \" \"")
 	
 	def __get_hand_cards_keyset__(self):
-		return frozenset(self.__hand_cards_keyset__)
+	    return frozenset(self.__hand_cards_keyset__)
 	hand_cards_keyset = property(__get_hand_cards_keyset__, doc="hand_cards_keyset={\" \"}")
 
 	def __add_cards__(self, cards):
 	    len1 = len(self.__hand_cards__)
 	    for c in cards:
-			self.__hand_cards__.append(c)
-			self.__hand_cards_keyset__.add(c.key)
+	        self.__hand_cards__.append(c)
+		self.__hand_cards_keyset__.add(c.key)
 	    len2 = len(self.__hand_cards__)
 
 	    for i in range(len1, len2-1):
-			for j in range(i,0,-1):
-		    	if ThreeKingPokerCard.compare(self.__hand_cards__[j-1], self.__hand_cards__[j]) > 0:
-					tmp = self.__hand_cards__[j]
-					self.__hand_cards__[j] = self.__hand_cards__[j-1]
-					self.__hand_cards__[j-1] = tmp
-		    	else:
-					break
-		self.__hand_cards_key__ = ",".join([c.key for c in self.__hand_cards__])
+	        for j in range(i,0,-1):
+		    if ThreeKingPokerCard.compare(self.__hand_cards__[j-1], self.__hand_cards__[j]) > 0:
+		        tmp = self.__hand_cards__[j]
+		        self.__hand_cards__[j] = self.__hand_cards__[j-1]
+		        self.__hand_cards__[j-1] = tmp
+		else:
+		    break
+	    self.__hand_cards_key__ = ",".join([c.key for c in self.__hand_cards__])
 
 
 	def __del_cards__(self, cards):
-    	for c in cards:
+    	    for c in cards:
         	self.__hand_cards_keyset__.remove(c.key)
 
-        tmp = self.__hand_cards__
-        self.__hand_cards__ = []
-        for i in range(len(tmp)):
+            tmp = self.__hand_cards__
+            self.__hand_cards__ = []
+            for i in range(len(tmp)):
         	if tmp[i].key not in self.__hand_cards_keyset__:
-            	continue
+            	    continue
         	self.__hand_cards__.append(tmp[i])
-        self.__hand_cards_key__ = ",".join([c.key for c in self.__hand_cards__])
+            self.__hand_cards_key__ = ",".join([c.key for c in self.__hand_cards__])
 
 
 
