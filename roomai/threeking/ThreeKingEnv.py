@@ -4,7 +4,6 @@ from roomai.threeking import ThreeKingPrivateState
 from roomai.threeking import ThreeKingPublicState
 from roomai.threeking import ThreeKingAction
 from roomai.threeking import ThreeKingPokerCard
-from roomai.threeking import AllThreeKingPatterns
 from roomai.threeking import AllThreeKingPokerCards
 import random
 
@@ -19,7 +18,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
     '''
     The ThreeKing game environment
     '''
-    def init(self, params = dict()):
+    def __init__(self, params = dict()):
         '''
         Initialization the ThreeKing game environment with the initialization params.
         The initialization is a dict with some options
@@ -32,9 +31,11 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         #player_name and player_role and parameter is valid
         #implement you code!
 
+        self.__params__ = dict()
+
         if "players" in params:
             self.__params__["players_info"] = params["palyers_info"]
-            self.__params__["num_players"] = len(params["players_info])"
+            self.__params__["num_players"] = len(params["players_info"])
         else:
             self.__params__["players_info"] = [['LiuBei','lord'],['MaChao','minister'],['ZhaoYun','minister'],['SiMaYi','rebel'],['ZhangLiao','rebel'],['XuChu','rebel'],['XiaHouDun','spy'],['SunSHangXiaNG','spy']]
 
@@ -42,9 +43,11 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
         
         if "allcards" in params:
-            allcards = [c.__deepcopy__() for c in params["allcards"]]
+            #allcards = [c.__deepcopy__() for c in params["allcards"]]
+            allcards = [c for c in params["allcards"]]
         else:
-            allcards = [c.__deepcopy__() for c in AllThreeKingPokerCards.values()]
+            #allcards = [c.__deepcopy__() for c in AllThreeKingPokerCards.values()]
+            allcards = [c for c in AllThreeKingPokerCards.values()]
             random.shuffle(allcards)
         self.__params__["allcards"] = allcards
 
@@ -53,7 +56,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         else:
             self.__params__["record_history"] = False
 
-        slef.player = {'LiuBei':(4,1,['RenDe','JiJiang']),'MaChao':(4,1,['MaShu','TieQi']),'ZhaoYun':(4,1,['LongDan','YaJiao']),'SiMaYi':(4,1,['FanKui','GuiCai']),'ZhangLiao':(4,1,['TuXi']),'XuChu':(4,1,['LuoYi']),'XiaHouDun':(4,1,['GangLie','QingJian']),'SunSHangXiaNG':(4,1,['JieYin','XiaoJi'])}
+        self.player = {'LiuBei':(4,1,['RenDe','JiJiang']),'MaChao':(4,1,['MaShu','TieQi']),'ZhaoYun':(4,1,['LongDan','YaJiao']),'SiMaYi':(4,1,['FanKui','GuiCai']),'ZhangLiao':(4,1,['TuXi']),'XuChu':(4,1,['LuoYi']),'XiaHouDun':(4,1,['GangLie','QingJian']),'SunSHangXiaNG':(4,1,['JieYin','XiaoJi'])}
 
         
         self.public_state = ThreeKingPublicState()
@@ -81,7 +84,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
         self.public_state.__previous_id__           = -1 #-1
         self.public_state.__previous_action__       = None
-        self.public_state.__lord_id__               = i  for i in range(self.__params__['num_players']) if self.__params__['player_info'][i][1] == 'lord'
+        self.public_state.__lord_id__               = [i  for i in range(self.__params__['num_players'])  if self.__params__['player_info'][i][1] == 'lord'][0]
         self.public_state.__num_players__           = self.__params__["num_players"]
         self.public_state.__num_discard_cards__     = 0
         self.public_state.__num_deposit_cards__     = 0
