@@ -4,13 +4,14 @@ class ThreeKingPokerCard(roomai.common.PokerCard):
     '''
     '''
 
-    def __init__(self, name, point, suit, genre):
+    def __init__(self, name, point, suit, genre, index):
 
         self.__name__       = name 
         self.__point__      = point
         self.__suit__       = suit
         self.__genre__      = genre
-        self.__key__        = "%s_%s_%s"%(self.__name__,self.__point__,self.__suit__)
+        self.__index__      = index
+        self.__key__        = "%s_%s_%s_%s"%(self.__name__,self.__point__,self.__suit__,self.__index__)
 
     @classmethod
     def lookup(cls, key):
@@ -48,4 +49,5 @@ AllThreeKingPokerCards = dict()
 for card in cards_list:
     num = card[4]
     for i in range(num):
-        AllThreeKingPokerCards["%s_%s_%s" % (card[0], card[1], card[2])] = ThreeKingPokerCard("%s,%s,%s,%s" % (card[0],card[1],card[2],card[3]))
+        AllThreeKingPokerCards["%s_%s_%s_%s" % (card[0], card[1], card[2], str(i))] = ThreeKingPokerCard('%s' % card[0],'%s' % card[1],'%s' % card[2],'%s' % card[3],'%s' % str(i))
+
