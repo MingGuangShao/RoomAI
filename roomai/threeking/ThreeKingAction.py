@@ -1,6 +1,5 @@
 import roomai.common
 import roomai.threeking
-from roomai.threeking import AllThreeKingPatterns
 
 class ThreeKingAction(roomai.common.AbstractAction):
     '''
@@ -21,24 +20,24 @@ class ThreeKingAction(roomai.common.AbstractAction):
 
         if len(key) > 0:
             action_info = self.key.split(',')
-            self.__skill__ = roomai.threeking.ThreeKingSkills.lookup(action_info[0])
+            self.__skill__ = roomai.threeking.ThreeKingSkills.lookup(action_info[0])# implement your code here!
 
-            if self.__skill__.name in []:#implement your code here!
+            if self.__skill__.name in ["Pass"]:#implement your code here!
                 self.__key__ = self.__skill__.name
 
-            elif self.__skill__.name in []:#implement your code here!
-                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1]))
+            elif self.__skill__.name in ["Get","Equip","NanManRuQin","WuZhongShengYou","WanJianQiFa","TaoYuanJieYi"]:#implement your code here!
+                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
                 self.__key__ = self.__skill__.name + ',' + self.__card_.key
 
-            elif self.__skill__.name in []:#implement your code here!
-                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1]))
+            elif self.__skill__.name in ["Sha","FengTianHuaJi","JueDou","WuXieKeJi","LeBuSiShu"]:#implement your code here!
+                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
 
                 for t in action_info[2].split('_'):
                     self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
                 self.__key__ = self.__skill__.name + ',' + self.__card_.key + ',' + '_'.join([t.name for t in self.__targets__])
             
-            elif self.__skill__.name in []:#implement your code here!
-                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1]))
+            elif self.__skill__.name in ["ShunShouQianYang","GuoHeChaiQiao"]:#implement your code here!
+                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
 
                 for t in action_info[2].split('_'):
                     self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
@@ -47,8 +46,8 @@ class ThreeKingAction(roomai.common.AbstractAction):
                     self.__other_targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
                 self.__key__ = self.__skill__.name + ',' + self.__card_.key + ',' + '_'.join([t.name for t in self.__other_targets__])
             
-            elif self.__skill__.name in []:#implement your code here!
-                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1]))
+            elif self.__skill__.name in ["JieDaoShaRen"]:#implement your code here!
+                self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
 
                 for t in action_info[2].split('_'):
                     self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
@@ -62,34 +61,35 @@ class ThreeKingAction(roomai.common.AbstractAction):
 
             else:
                 #implement your code here!
+                pass
                 
-        @classmethod
-        def __get_skill__(self):
-            return self.__skill__
-        skill = property(__get_skill__, doc="The skill of this action." ) 
+    @classmethod
+    def __get_skill__(self):
+        return self.__skill__
+    skill = property(__get_skill__, doc="The skill of this action." ) 
 
-        def __get_card__(self):
-            return self.__card__
-        card = property(__get_card__, doc="The card of this action." ) 
-          
-        def __get_targets__(self):
-            return tuple(self.__targets__) 
-        targets = property(__get_targets__, doc="The targets of this action." ) 
+    def __get_card__(self):
+        return self.__card__
+    card = property(__get_card__, doc="The card of this action." ) 
+      
+    def __get_targets__(self):
+        return tuple(self.__targets__) 
+    targets = property(__get_targets__, doc="The targets of this action." ) 
 
-        def __get_other_targets__(self):
-            return tuple(self.__other_targets__) 
-        other_targets = property(__get_other_targets__, doc="The other targets of this action." ) 
+    def __get_other_targets__(self):
+        return tuple(self.__other_targets__) 
+    other_targets = property(__get_other_targets__, doc="The other targets of this action." ) 
 
-        def __get_target_zones__(self):
-            return tuple(self.__target_zones__) 
-        target_zones = property(__get_target_zones__, doc="The  target zones of this action." ) 
+    def __get_target_zones__(self):
+        return tuple(self.__target_zones__) 
+    target_zones = property(__get_target_zones__, doc="The  target zones of this action." ) 
 
-        def __get_target_cards__(self):
-            return tuple(self.__target_cards__) 
-        target_cards = property(__get_target_cards__, doc="The  target cards of this action." )
+    def __get_target_cards__(self):
+        return tuple(self.__target_cards__) 
+    target_cards = property(__get_target_cards__, doc="The  target cards of this action." )
 
-        @classmethod
-        def lookup(cls, key) :
+    @classmethod
+    def lookup(cls, key):
         '''
         lookup a ThreeKing action with the specified key
         :param key: THe specified key
