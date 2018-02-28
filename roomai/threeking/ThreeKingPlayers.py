@@ -12,7 +12,11 @@ class Player(roomai.common.AbstractPlayer):
         '''
         define a policy to play the game
         return an action object
-        ''' 
+        '''
+        #implement your code here
+        #a = strategy(self.avaliable_actions.values()) 
+        #return ThreeKingAction.lookup(a)
+
     def receive_info(self, info):
         '''
         '''
