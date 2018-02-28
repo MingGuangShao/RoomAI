@@ -1,7 +1,7 @@
 import roomai.common
 from roomai.threeking import ThreeKingPublicState
 from roomai.threeking import ThreeKingPrivateState
-from roomai.threeking import ThreeKingPublicState
+from roomai.threeking import ThreeKingPersonState
 from roomai.threeking import ThreeKingAction
 from roomai.threeking import ThreeKingPokerCard
 from roomai.threeking import AllThreeKingPokerCards
@@ -18,7 +18,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
     '''
     The ThreeKing game environment
     '''
-    def __init__(self, params = dict()):
+    def init(self, params = dict()):
         '''
         Initialization the ThreeKing game environment with the initialization params.
         The initialization is a dict with some options
@@ -61,11 +61,11 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         
         self.public_state = ThreeKingPublicState()
         self.private_state = ThreeKingPrivateState()
-        self.person_state = [ThreeKingPersonState() for i in range(self.__params__["num_players"])]
+        self.person_states = [ThreeKingPersonState() for i in range(self.__params__["num_players"])]
 
         self.public_state_history = []
         self.private_state_history = []
-        self.person_state_history = []
+        self.person_states_history = []
 
         ##private_state
         self.private_state.__keep_cards__ = allcards ## it means?##check more!!!
@@ -75,7 +75,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             for j in range(4):
             # in this part, some an hero can get more cards
             # implement your code!
-                c = self.private_state.__keep__cards__.pop() ## check more !!!
+                c = self.private_state.__keep_cards__.pop() ## check more !!!
                 tmp.append(c)
             self.person_states[i].__add_cards__(tmp)
 
@@ -84,17 +84,17 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
         self.public_state.__previous_id__           = -1 #-1
         self.public_state.__previous_action__       = None
-        self.public_state.__lord_id__               = [i  for i in range(self.__params__['num_players'])  if self.__params__['player_info'][i][1] == 'lord'][0]
+        self.public_state.__lord_id__               = [i  for i in range(self.__params__['num_players'])  if self.__params__['players_info'][i][1] == 'lord'][0]
         self.public_state.__num_players__           = self.__params__["num_players"]
         self.public_state.__num_discard_cards__     = 0
         self.public_state.__num_deposit_cards__     = 0
         self.public_state.__num_equipment_cards__   = 0
         self.public_state.__num_fate_zone_cards__   = 0
-        self.public_state.__num_hand_cards__        = [len(person_state.hand_cards) for person_state in self.person_states]
+        self.public_state.__num_hand_cards__        = [len(p.hand_cards) for p in self.person_states]
         self.public_state.__num_keep_cards__        = len(self.private_state.keep_cards)
 
         # init self.public_state.__turn__        
-        self.public_state.__turn__                  = self.public_state.__lord__id__
+        self.public_state.__turn__                  = self.public_state.__lord_id__
 
         # init self.public_state.__state__
         for info in self.__params__["players_info"]:
@@ -108,7 +108,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             defend          = 1
             skill           = self.player[name][2]
             
-            tmp             = {'name':name,'alive':alive,'state':state,'hp':hp,'sex':sex,'attack':attack,'defend':defend,'skill':skill}
+            tmp             = {'name':name,'alive':alive,'hp':hp,'sex':sex,'attack':attack,'defend':defend,'skill':skill}
 
             self.public_state.__state__.append(tmp)
             
@@ -116,11 +116,11 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         for i in range(self.__params__["num_players"]):
             self.person_states[i].__role__    = self.__params__["players_info"][i][1]
 
-            if i == self.public_state.trun:
-                self.person_states[i].__avaliable_actions__ =  ThreeKingEnv.avaliable_actions(self.public_states, self.person_states[i]) 
+            if i == self.public_state.turn:
+                self.person_states[i].__avaliable_actions__ =  ThreeKingEnv.avaliable_actions(self.public_state, self.person_states[i]) 
             
-        self.__gen_history__()
-        infos = self.gen_infos__()
+        #self.__gen_history__()
+        infos = self.__gen_infos__()
 
         return infos, self.public_state, self.person_states, self.private_state
 
@@ -132,7 +132,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         '''
         pu = self.public_state
         pr = self.private_state
-        pes = self.person_state
+        pes = self.person_states
         trun = pu.turn
 
         if self.is_action_valid(action, pu, pes[turn]) == False: #implement code here!
@@ -151,7 +151,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         :param players: The players
         :return: scores for the players
         '''
-        mun_players = len(players)
+        num_players = len(players)
         infos, public_state, person_states, private_state = env.init()#implement your code here
 
         for i in range(env.__params__["num_players"]):
@@ -166,3 +166,13 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                 players[i].receive_info(infos[i])
 
         #return implement code here!
+
+    @classmethod
+    def avaliable_actions(cls, public_state, person_state):
+
+        avaliable_actions   = dict()
+
+        '''
+        
+        '''
+        return avaliable_actions        
