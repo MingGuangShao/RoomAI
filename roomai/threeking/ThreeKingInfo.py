@@ -14,13 +14,13 @@ class ThreeKingPublicState(roomai.common.AbstractPublicState):
         self.__lord_id__	                    = None
         self.__num_players__	                    = None
         self.__num_discard_cards__	            = None
-        self.__discard_cards__		            = None
+        self.__discard_cards__		            = []
         self.__num_deposit_cards__	            = None
-        self.__deposit_cards__		            = None
+        self.__deposit_cards__		            = []
         self.__num__equipment_cards__	            = None
-        self.__equipment_cards__		    = None
+        self.__equipment_cards__		    = []
         self.__num_fate_zone_cards__	            = None
-        self.__fate_zone_cards__		    = None
+        self.__fate_zone_cards__		    = []
         self.__num_hand_cards__			    = None
         self.__num_keep_cards__                     = None
 		
@@ -103,6 +103,12 @@ class ThreeKingPublicState(roomai.common.AbstractPublicState):
     num_keep_cards = property(__get_num_keep_cards__, doc="num_keep_cards = 12 denotes 12 cards in keep zone ...")
     
 
+    def __add_discard_card__(self, c):
+
+        self.__discard_cards__.append(c)
+        self.__num_discard_cards = self.__num_discard_cards__ + 1
+        
+
 
 class ThreeKingPrivateState(roomai.common.AbstractPrivateState):
     '''
@@ -149,13 +155,22 @@ class ThreeKingPersonState(roomai.common.AbstractPersonState):
         return frozenset(self.__hand_cards_keyset__)
     hand_cards_keyset = property(__get_hand_cards_keyset__, doc="hand_cards_keyset={\" \"}")
 
+
+    def __add_card__(self, c):
+
+        self.__hand_cards__.append(c)
+        self.__hand_cards_keyset__.add(c.key)
+        
+        self.__hand_cards_key__ = ",".join([c.key for c in self.__hand_cards__])
+
+
     def __add_cards__(self, cards):
         len1 = len(self.__hand_cards__)
         for c in cards:
             self.__hand_cards__.append(c)
             self.__hand_cards_keyset__.add(c.key)
-        len2 = len(self.__hand_cards__)
         '''
+        len2 = len(self.__hand_cards__)
         for i in range(len1, len2-1):
             for j in range(i,0,-1):
                 if ThreeKingPokerCard.compare(self.__hand_cards__[j-1], self.__hand_cards__[j]) > 0:
@@ -165,6 +180,17 @@ class ThreeKingPersonState(roomai.common.AbstractPersonState):
                 else:
                     break
         '''
+        self.__hand_cards_key__ = ",".join([c.key for c in self.__hand_cards__])
+
+    def __del_card__(self, c):
+        self.__hand_cards_keyset__.remove(c.key)
+        
+        tmp = self.__hand_cards__
+        self.__hand_cards__ = []
+        for i in range(len(tmp)):
+            if c.key == tmp[i].key:
+                continue
+            self.__hand_cards__.append(tmp[i])
         self.__hand_cards_key__ = ",".join([c.key for c in self.__hand_cards__])
 
 

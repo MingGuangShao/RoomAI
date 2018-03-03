@@ -1,8 +1,8 @@
 #!/bin/python
 
 import roomai.threeking
-from roomai.threeking import ThreekingAction
-from roomai.threeking import ThreekingPokerCard
+from roomai.threeking import ThreeKingAction
+from roomai.threeking import ThreeKingPokerCard
 
 
 class Player(roomai.common.AbstractPlayer):
@@ -14,14 +14,17 @@ class Player(roomai.common.AbstractPlayer):
         return an action object
         '''
         #implement your code here
-        #a = strategy(self.avaliable_actions.values()) 
-        #return ThreeKingAction.lookup(a)
+        #a = strategy(self.avaliable_actions.values())
+        # For Unit Test
+        a = "Sha,SHA_7_spade_0,MaChao" 
+        return ThreeKingAction.lookup(a)
 
     def receive_info(self, info):
         '''
         '''
+        #question? why self.public_state
         self.public_state = info.public_state
-        self.avaliable_actions = info.person_state.avaliable_actions
+        self.available_actions = info.person_state.available_actions
 
     def reset(self):
         '''

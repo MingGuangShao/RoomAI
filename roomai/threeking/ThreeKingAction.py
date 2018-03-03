@@ -20,37 +20,41 @@ class ThreeKingAction(roomai.common.AbstractAction):
 
         if len(key) > 0:
             action_info = self.key.split(',')
-            self.__skill__ = roomai.threeking.ThreeKingSkills.lookup(action_info[0])# implement your code here!
+            self.__skill__  = action_info[0]
 
-            if self.__skill__.name in ["Pass"]:#implement your code here!
-                self.__key__ = self.__skill__.name
+            if self.__skill__ in ["Pass"]:#implement your code here!
+                self.__key__ = self.__skill__
 
-            elif self.__skill__.name in ["Get","Equip","NanManRuQin","WuZhongShengYou","WanJianQiFa","TaoYuanJieYi"]:#implement your code here!
+            elif self.__skill__ in ["Get","Equip","NanManRuQin","WuZhongShengYou","WanJianQiFa","TaoYuanJieYi"]:#implement your code here!
                 self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
-                self.__key__ = self.__skill__.name + ',' + self.__card_.key
+                self.__key__ = self.__skill__ + ',' + self.__card_.key
 
-            elif self.__skill__.name in ["Sha","FengTianHuaJi","JueDou","WuXieKeJi","LeBuSiShu"]:#implement your code here!
+            elif self.__skill__ in ["Sha","FengTianHuaJi","JueDou","WuXieKeJi","LeBuSiShu"]:#implement your code here!
                 self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
 
                 for t in action_info[2].split('_'):
-                    self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
-                self.__key__ = self.__skill__.name + ',' + self.__card_.key + ',' + '_'.join([t.name for t in self.__targets__])
+                    #self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
+                    self.__targets__.append(t)
+                self.__key__ = self.__skill__ + ',' + self.__card__.key + ',' + '_'.join([t for t in self.__targets__])
             
-            elif self.__skill__.name in ["ShunShouQianYang","GuoHeChaiQiao"]:#implement your code here!
+            elif self.__skill__ in ["ShunShouQianYang","GuoHeChaiQiao"]:#implement your code here!
                 self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
 
                 for t in action_info[2].split('_'):
-                    self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
+                    #self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
+                    self.__targets__.append(t)
 
                 for t in action_info[3].split('_'):
-                    self.__other_targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
-                self.__key__ = self.__skill__.name + ',' + self.__card_.key + ',' + '_'.join([t.name for t in self.__other_targets__])
+                    #self.__other_targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
+                    self.__other_targets__.append(t)
+                self.__key__ = self.__skill__ + ',' + self.__card_.key + ',' + '_'.join([t for t in self.__other_targets__])
             
-            elif self.__skill__.name in ["JieDaoShaRen"]:#implement your code here!
+            elif self.__skill__ in ["JieDaoShaRen"]:#implement your code here!
                 self.__card__ = roomai.threeking.ThreeKingPokerCard.lookup(action_info[1])
 
                 for t in action_info[2].split('_'):
-                    self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
+                    #self.__targets__.append(roomai.threeking.ThreeKingPlayers.lookup(t))
+                    self.__targets__.append(t)
 
                 for z in action_info[3].split('_'):
                     self.__target_zones__.append(z)

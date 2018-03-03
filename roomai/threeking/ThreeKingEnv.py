@@ -5,6 +5,7 @@ from roomai.threeking import ThreeKingPersonState
 from roomai.threeking import ThreeKingAction
 from roomai.threeking import ThreeKingPokerCard
 from roomai.threeking import AllThreeKingPokerCards
+from roomai.threeking.ThreeKingSkills import *
 import random
 
 import roomai.threeking
@@ -78,6 +79,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                 c = self.private_state.__keep_cards__.pop() ## check more !!!
                 tmp.append(c)
             self.person_states[i].__add_cards__(tmp)
+                
 
         ##init public_state
         self.public_state.__terminal__              = False
@@ -117,7 +119,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             self.person_states[i].__role__    = self.__params__["players_info"][i][1]
 
             if i == self.public_state.turn:
-                self.person_states[i].__avaliable_actions__ =  ThreeKingEnv.avaliable_actions(self.public_state, self.person_states[i]) 
+                self.person_states[i].__available_actions__ =  ThreeKingEnv.available_actions(self.public_state, self.person_states[i]) 
             
         #self.__gen_history__()
         infos = self.__gen_infos__()
@@ -133,17 +135,21 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         pu = self.public_state
         pr = self.private_state
         pes = self.person_states
-        trun = pu.turn
+        turn = pu.turn
 
         if self.is_action_valid(action, pu, pes[turn]) == False: #implement code here!
             raise ValueError("The (%s) is an invalid action " % (action.key))
-        
-        self.change_state()#implement you code here!
-        '''
-        ThreeKingSkills.take_action(pu,pr,pes,action)# action is an object
-        '''
+       
+         
+        #self.change_state()#implement you code here!
+        self.take_action(pu,pr,pes,action)# action is an object
+    
+        infos = self.__gen_infos__()    
+        return infos, self.public_state, self.person_states, self.private_state
 
-    def complete(cls, env, players):
+
+    @classmethod
+    def compete(cls, env, players):
         '''
         use the game environment to hold a complete for the players
         
@@ -157,22 +163,88 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         for i in range(env.__params__["num_players"]):
             players[i].receive_info(infos[i])
 
-        while public_state.stage == False:
+        while public_state.terminal == False:
             turn    = public_state.turn
             action  = players[turn].take_action()
+            #For Unit Test
+            person_states[turn].__add_card__(ThreeKingPokerCard.lookup('SHA_7_spade_0'))
+            public_state.__num_hand_cards__        = [len(p.hand_cards) for p in person_states]
+            public_state.__num_keep_cards__        = len(private_state.keep_cards)
+
+            # For Unit Test 
+            print "BEFORE FORWARD"
+            ThreeKingEnv.print_info(env.__params__,public_state, person_states, private_state)
+    
             infos, public_state, person_states, private_state = env.forward(action)
+            
+            print " "
+            print "AFTER FORWARD"
+            c = private_state.__keep_cards__.pop() ## For Unit Test
+            public_state.__num_hand_cards__        = [len(p.hand_cards) for p in person_states]
+            public_state.__num_keep_cards__        = len(private_state.keep_cards)
+            ThreeKingEnv.print_info(env.__params__,public_state, person_states, private_state)
 
             for i in range(env.__params__["num_players"]):
                 players[i].receive_info(infos[i])
+            #For Unit Test
+            return 0
 
         #return implement code here!
 
-    @classmethod
-    def avaliable_actions(cls, public_state, person_state):
 
-        avaliable_actions   = dict()
+    def take_action(self,pu,pr,pes,action):
+    
+        skill_name      = action.__skill__
+        card            = action.__card__
+        targets         = action.__targets__
+        other_targets   = action.__other_targets__
+        target_zones    = action.__target_zones__
+        target_cards    = action.__target_cards__
+        
+        if skill_name in ["Pass"]:
+            #globals().get_str(skill_name)(pu,pr,pes)
+            globals()[skill_name](pu,pr,pes)
+
+        elif skill_name in ["Get","Equip","Fate","NanManRuQin","WuZhongShengYou","WanJianQiFa","TaoYuanJieYi"]:
+            #globals().get_str(skill_name)(pu,pr,pes,card)
+            globals()[skill_name](pu,pr,pes,card)
+         
+        elif skill_name in ["Sha","FengTianHuaJi","JueDou","WuXieKeJi","LeBuSiShu"]:
+            #globals().get_str(skill_name)(pu,pr,pes,card,targets)
+            globals()[skill_name](pu,pr,pes,card,targets)
+         
+        elif skill_name in ["ShunShouQianYang","GuoHeChaiQiao"]:
+            #globals().get_str(skill_name)(pu,pr,pes,card,targets,other_targets)
+            globals()[skill_name](pu,pr,pes,card,targets,other_targets)
+        
+        elif skill_name in ["JieDaoShaRen"]:
+            #globals().get_str(skill_name)(pu,pr,pes,card,targets,targets_zones,target_cards)
+            globals()[skill_name](pu,pr,pes,card,targets,targets_zones,target_cards)
+
+
+    @classmethod
+    def is_action_valid(self, action, public_state, person_state):
+        #return action.key in person_state.available_actions
+        return True
+
+
+    @classmethod
+    def available_actions(cls, public_state, person_state):
+
+        available_actions   = dict()
 
         '''
         
         '''
-        return avaliable_actions        
+        return available_actions
+
+    @classmethod
+    def print_info(self,params,pu,pe,pr):
+    
+        print "players info in env params: ", params["players_info"]
+        print "lord id in public_state: ", pu.__lord_id__
+        print "cards in person_states[0]: ", pe[0].__hand_cards_key__
+        print "num of cards in discard zone: ", pu.__num_discard_cards__
+        print "num of hand cards in public_state: ",pu.__num_hand_cards__
+        print "num of cards in private_state: ",pu.__num_keep_cards__
+        

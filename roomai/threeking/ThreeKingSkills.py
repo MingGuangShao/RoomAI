@@ -1,6 +1,7 @@
 #!/bin/python
 import roomai.common
 
+'''
 def take_action(pu,pr,pes,action):
 
     skill_name      = action.skill.skill_name
@@ -24,16 +25,16 @@ def take_action(pu,pr,pes,action):
     
     elif skill_name in ["JieDaoShaRen"]:
         globals().get_str(skill_name)(pu,pr,pes,card,targets,targets_zones,target_cards)
-
+'''
 
 def Sha(pu, pr, pes, card, targets):
     '''
     '''
-    pes[pu.turn].__del_cards__(card)
-    pu.__num_hand_cards__[turn] = len(pes[pu.turn].hand_cards)
+    pes[pu.turn].__del_card__(card)
+    pu.__num_hand_cards__[pu.turn] = len(pes[pu.turn].hand_cards)
 
-    pu.__add_discard_cards__(card)
-    pu.__num_discard_cards__    = len(pu.num_discard_cards) 
+    pu.__add_discard_card__(card)
+    pu.__num_discard_cards__    = pu.num_discard_cards
 
     
 def NanManRuQin(pu,pr,pes):
