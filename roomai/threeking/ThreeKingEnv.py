@@ -84,8 +84,8 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         ##init public_state
         self.public_state.__terminal__              = False
 
-        self.public_state.__previous_id__           = -1 #-1
-        self.public_state.__previous_action__       = None
+        self.public_state.__previous_id__           = -1#previous id and action used in skill
+        self.public_state.__previous_action__       = None#previous id and action used in skill
         self.public_state.__lord_id__               = [i  for i in range(self.__params__['num_players'])  if self.__params__['players_info'][i][1] == 'lord'][0]
         self.public_state.__num_players__           = self.__params__["num_players"]
         self.public_state.__num_discard_cards__     = 0
@@ -97,17 +97,18 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
         # init self.public_state.__turn__        
         self.public_state.__turn__                  = self.public_state.__lord_id__
+        self.public_state.__previous_turn__           = self.public_state.__lord_id__#previous turn record the turn before breaked
 
         # init self.public_state.__state__
         for info in self.__params__["players_info"]:
             name            = info[0]
             alive           = 1
-            peroid          = 0 if info[1] == 'lord' else -1
+            peroid          = 0 if info[1] == 'lord' else -1 # This item record the six peroid of each player
             hp              = self.player[name][0] + 1 if info[1] == 'lord' else self.player[name][0]
             max_hp          = hp
             sex             = self.player[name][1]
-            attack          = 1
-            defend          = 1
+            attack          = 1 #attack_distance
+            defend          = 1 #defend_distance
             skill           = self.player[name][2]
             
             tmp             = {'name':name,'alive':alive,'hp':hp,'sex':sex,'attack':attack,'defend':defend,'skill':skill}
@@ -143,6 +144,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
          
         #self.change_state()#implement you code here!
         self.take_action(pu,pr,pes,action)# action is an object
+        #self.change_state()#implement you code here!
     
         infos = self.__gen_infos__()    
         return infos, self.public_state, self.person_states, self.private_state
@@ -158,9 +160,9 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         :return: scores for the players
         '''
         num_players = len(players)
-        infos, public_state, person_states, private_state = env.init()#implement your code here
+        infos, public_state, person_states, private_state = env.init()
 
-        for i in range(env.__params__["num_players"]):
+        for i in range(env.__params__["num_players"]):#question why player need receive info? for choose strategy?maybe
             players[i].receive_info(infos[i])
 
         while public_state.terminal == False:
@@ -182,6 +184,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             c = private_state.__keep_cards__.pop() ## For Unit Test
             public_state.__num_hand_cards__        = [len(p.hand_cards) for p in person_states]
             public_state.__num_keep_cards__        = len(private_state.keep_cards)
+            public_state.__num_discard_cards__        = len(public_state.discard_cards)
             ThreeKingEnv.print_info(env.__params__,public_state, person_states, private_state)
 
             for i in range(env.__params__["num_players"]):
@@ -227,7 +230,84 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         #return action.key in person_state.available_actions
         return True
 
+    @classmethod
+    def cal_turn(self, action, pu):
+        # change element turn in public_state
 
+        #find the period player
+        skill_name = action.__skill__
+        name_list = [p.name for p in pu.__state__]
+        period_list = [p.period for p in pu.__state__]
+        period_turn = period_list.index([i for i in peroid_list if i > 0][0])
+
+        if skill_name in ["Pass","Get","Equip","Fate","WuZhongShengYou"]:
+            turn = period_turn
+
+        else:
+
+            #find the action target player,first group skill
+            if skillname in ["NanManRuQin","WanJianQiFa","TaoYuanJieYi","WuGuFengDeng"]:
+                targets = [i for i in range(len(pu.__state__)) if period_list[i] != -2]# -2 means dead
+
+                targets_turn = []
+                if skillname in ["NanManRuQin","WanJianQiFa"]:
+                    targets_turn = targets[pu.__period_turn__+1:] + targets[:pu.__period_turn__]
+                else:
+                    targets_turn = targets[pu.__period_turn__:] + targets[:pu.__period_turn__]
+
+                #boundary condition
+                if pu.__previous_turn__ = targets_turn[-1]:
+                    turn = period_turn
+                else:
+                    turn = targets_turn[targets_turn.index(pu.__previous_turn__) + 1]
+
+            else:
+            
+                if len(targets) != 1:
+                    print "error"
+                    exit()
+                turn = name_list.index([name for name in name_list if name == targets][0])
+
+        return turn
+            
+    @classmethod
+    def is_ask_wuxie(self, action, pu, pe):
+        # calculate the condition of asking WuXieKeJi
+        # return the list of id who has WuXieKeJi or None
+        card = action.__card__
+        ask_WuXie = None
+        is_JinNang = False
+        has_WuXie = False
+        
+        tmp = list()
+
+        person_cards = list()
+        for i in range(len(pu.__state__)):
+                
+            if pu.__state__[i]['period'] == -2:
+                person_cards.append([])
+
+            else:
+                tmp = pe[i].__hand_cards_key__.split(',')
+                name_list = [c.split('_')[0] for c in tmp]
+                person_cards.append(name_list)
+
+                if "WuXie" in name_list:
+                    has_WuXie = True
+                    tmp.append(i)
+        
+        if card is not None and card.__genre__ == "JinNang":
+            is_JinNang = True
+
+        if is_JinNang  and has_WuXie:
+           
+            ask_WuXie = list()
+            ask_WuXie = tmp
+
+        return ask_WuXie
+             
+
+ 
     @classmethod
     def available_actions(cls, public_state, person_state):
 
