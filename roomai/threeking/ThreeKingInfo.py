@@ -8,6 +8,7 @@ class ThreeKingPublicState(roomai.common.AbstractPublicState):
         self.__terminal__                           = None
         self.__state__			            = []
         self.__turn__                               = None
+        self.__previous_turn__                      = None
         self.__previous_id__                        = None
         self.__previous_action__                    = None
 
@@ -35,6 +36,9 @@ class ThreeKingPublicState(roomai.common.AbstractPublicState):
 
     def __get_turn__(self): return self.__turn__
     turn = property(__get_turn__, doc="")
+
+    def __get_previous_turn__(self): return self.__previous_turn__
+    previous_turn = property(__get_previous_turn__, doc="")
 
     def __get_previous_id__(self): return self.__previous_id__
     previous_id = property(__get_previous_id__, doc="")
@@ -102,13 +106,177 @@ class ThreeKingPublicState(roomai.common.AbstractPublicState):
         return tuple(self.__num_keep_cards__)
     num_keep_cards = property(__get_num_keep_cards__, doc="num_keep_cards = 12 denotes 12 cards in keep zone ...")
     
-
     def __add_discard_card__(self, c):
 
         self.__discard_cards__.append(c)
-        self.__num_discard_cards = self.__num_discard_cards__ + 1
-        
+        self.__num_discard_cards__ = self.__num_discard_cards__ + 1
 
+    def __add_discard_cards__(self, cards):
+
+        len1 = len(cards)
+        for c in cards:
+            self.__discard_cards__.append(c)
+        self.__num_discard_cards__ = self.__num_discard_cards__ + len1
+
+    def __del_discard_card__(self, c):
+        
+        tmp = self.__discard_cards__
+        self.__discard_cards__ = []
+        for i in range(len(tmp)):
+            if c.key == tmp[i].key:
+                continue
+            self.__discard_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_discard_cards - 1 >= 0:
+            self.__num_discard_cards__ = self.__num_discard_cards__ - 1
+        else:
+            print "error , num_cards can not less than 0"
+
+    def __del_discard_cards__(self, cards):
+
+        len1 = len(cards)
+        tmp = self.__discard_cards__
+        self.__discard_cards__ = []
+        for i in range(len(tmp)):
+            if tmp[i].key in [c.key for c in cards]:
+                continue
+            self.__discard_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_discard_cards - len1 >= 0:
+            self.__num_discard_cards__ = self.__num_discard_cards__ - len1
+        else:
+            print "error , num_cards can not less than 0"
+
+    def __add_deposit_card__(self, c):
+
+        self.__deposit_cards__.append(c)
+        self.__num_deposit_cards__ = self.__num_deposit_cards__ + 1
+
+    def __add_deposit_cards__(self, cards):
+
+        len1 = len(cards)
+        for c in cards:
+            self.__deposit_cards__.append(c)
+        self.__num_deposit_cards__ = self.__num_deposit_cards__ + len1
+
+    def __del_deposit_card__(self, c):
+        
+        tmp = self.__deposit_cards__
+        self.__deposit_cards__ = []
+        for i in range(len(tmp)):
+            if c.key == tmp[i].key:
+                continue
+            self.__deposit_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_deposit_cards - 1 >= 0:
+            self.__num_deposit_cards__ = self.__num_deposit_cards__ - 1
+        else:
+            print "error , num_cards can not less than 0"
+
+    def __del_deposit_cards__(self, cards):
+
+        len1 = len(cards)
+        tmp = self.__deposit_cards__
+        self.__deposit_cards__ = []
+        for i in range(len(tmp)):
+            if tmp[i].key in [c.key for c in cards]:
+                continue
+            self.__deposit_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_deposit_cards - len1 >= 0:
+            self.__num_deposit_cards__ = self.__num_deposit_cards__ - len1
+        else:
+            print "error , num_cards can not less than 0"
+
+    def __add_equipment_card__(self, c):
+
+        self.__equipment_cards__.append(c)
+        self.__num_equipment_cards__ = self.__num_equipment_cards__ + 1
+
+    def __add_equipment_cards__(self, cards):
+
+        len1 = len(cards)
+        for c in cards:
+            self.__equipment_cards__.append(c)
+        self.__num_equipment_cards__ = self.__num_equipment_cards__ + len1
+
+    def __del_equipment_card__(self, c):
+        
+        tmp = self.__equipment_cards__
+        self.__equipment_cards__ = []
+        for i in range(len(tmp)):
+            if c.key == tmp[i].key:
+                continue
+            self.__equipment_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_equipment_cards - 1 >= 0:
+            self.__num_equipment_cards__ = self.__num_equipment_cards__ - 1
+        else:
+            print "error , num_cards can not less than 0"
+
+    def __del_equipment_cards__(self, cards):
+
+        len1 = len(cards)
+        tmp = self.__equipment_cards__
+        self.__equipment_cards__ = []
+        for i in range(len(tmp)):
+            if tmp[i].key in [c.key for c in cards]:
+                continue
+            self.__equipment_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_equipment_cards - len1 >= 0:
+            self.__num_equipment_cards__ = self.__num_equipment_cards__ - len1
+        else:
+            print "error , num_cards can not less than 0"
+
+    def __add_fate_zone_card__(self, c):
+
+        self.__fate_zone_cards__.append(c)
+        self.__num_fate_zone_cards__ = self.__num_fate_zone_cards__ + 1
+
+    def __add_fate_zone_cards__(self, cards):
+
+        len1 = len(cards)
+        for c in cards:
+            self.__fate_zone_cards__.append(c)
+        self.__num_fate_zone_cards__ = self.__num_fate_zone_cards__ + len1
+
+    def __del_fate_zone_card__(self, c):
+        
+        tmp = self.__fate_zone_cards__
+        self.__fate_zone_cards__ = []
+        for i in range(len(tmp)):
+            if c.key == tmp[i].key:
+                continue
+            self.__fate_zone_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_fate_zone_cards - 1 >= 0:
+            self.__num_fate_zone_cards__ = self.__num_fate_zone_cards__ - 1
+        else:
+            print "error , num_cards can not less than 0"
+
+    def __del_fate_zone_cards__(self, cards):
+
+        len1 = len(cards)
+        tmp = self.__fate_zone_cards__
+        self.__fate_zone_cards__ = []
+        for i in range(len(tmp)):
+            if tmp[i].key in [c.key for c in cards]:
+                continue
+            self.__fate_zone_cards__.append(tmp[i])
+        
+        ##try
+        if self.__num_fate_zone_cards - len1 >= 0:
+            self.__num_fate_zone_cards__ = self.__num_fate_zone_cards__ - len1
+        else:
+            print "error , num_cards can not less than 0"
 
 class ThreeKingPrivateState(roomai.common.AbstractPrivateState):
     '''
