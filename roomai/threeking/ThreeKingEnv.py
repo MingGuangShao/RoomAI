@@ -90,20 +90,19 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         self.public_state.__num_players__           = self.__params__["num_players"]
         self.public_state.__num_discard_cards__     = 0
         self.public_state.__num_deposit_cards__     = 0
-        self.public_state.__num_equipment_cards__   = 0
-        self.public_state.__num_fate_zone_cards__   = 0
+        self.public_state.__num_equipment_cards__   = 0 * self.__params__["num_players"]
+        self.public_state.__num_fate_zone_cards__   = 0 * self.__params__["num_players"]
         self.public_state.__num_hand_cards__        = [len(p.hand_cards) for p in self.person_states]
         self.public_state.__num_keep_cards__        = len(self.private_state.keep_cards)
 
         # init self.public_state.__turn__        
         self.public_state.__turn__                  = self.public_state.__lord_id__
-        self.public_state.__previous_turn__           = self.public_state.__lord_id__#previous turn record the turn before breaked
+        self.public_state.__previous_turn__         = self.public_state.__lord_id__#previous turn record the turn before breaked
 
         # init self.public_state.__state__
         for info in self.__params__["players_info"]:
             name            = info[0]
-            alive           = 1
-            peroid          = 0 if info[1] == 'lord' else -1 # This item record the six peroid of each player
+            period          = 0 if info[1] == 'lord' else -1 # This item record the six peroid of each player,-1 means wait
             hp              = self.player[name][0] + 1 if info[1] == 'lord' else self.player[name][0]
             max_hp          = hp
             sex             = self.player[name][1]
@@ -111,7 +110,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             defend          = 1 #defend_distance
             skill           = self.player[name][2]
             
-            tmp             = {'name':name,'alive':alive,'hp':hp,'sex':sex,'attack':attack,'defend':defend,'skill':skill}
+            tmp             = {'name':name,'period':period,'hp':hp,'max_hp','sex':sex,'attack':attack,'defend':defend,'skill':skill}
 
             self.public_state.__state__.append(tmp)
             
@@ -141,10 +140,8 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         if self.is_action_valid(action, pu, pes[turn]) == False: #implement code here!
             raise ValueError("The (%s) is an invalid action " % (action.key))
        
-         
-        #self.change_state()#implement you code here!
         self.take_action(pu,pr,pes,action)# action is an object
-        #self.change_state()#implement you code here!
+        self.change_state(pu,action)#implement you code here!
     
         infos = self.__gen_infos__()    
         return infos, self.public_state, self.person_states, self.private_state
@@ -230,46 +227,234 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         #return action.key in person_state.available_actions
         return True
 
+
     @classmethod
-    def cal_turn(self, action, pu):
-        # change element turn in public_state
+    def cal_period_turn(self, pu, action):
+        # change period and  turn in public_state
 
-        #find the period player
+        period_list = [p['period'] for p in pu.__state__]   #The period before change state, -2 means dead, -1 means wait
+        name_list = [p['name'] for p in pu.__state__]       #All hero names in public state
+        targets = [i for i in range(len(pu.__state__)) if period_list[i] != -2]#Index the hero aliving
+        period_turn = period_list.index([i for i in peroid_list if i > 0][0])#index of hero has the period
+        pre_turn =  pu.__turn__
+
         skill_name = action.__skill__
-        name_list = [p.name for p in pu.__state__]
-        period_list = [p.period for p in pu.__state__]
-        period_turn = period_list.index([i for i in peroid_list if i > 0][0])
+        #First change the hero's period
+        #check
+        assert len(targets) > 2 and len([i for i in period_list if i > 0]) == 1 
+    
+        period  = pu.__state__[period_turn]['period']   #Thre period of hero before change state
+        hero_skill   = pu.__state__[period_turn]['skill']    #Assume hero only have one skill
+        action_skill   = action.__skill__    #Assume hero only have one skill
 
-        if skill_name in ["Pass","Get","Equip","Fate","WuZhongShengYou"]:
-            turn = period_turn
+        # if the period_turn the same as the turn before change state
+        #same_turn = True if period_turn == pre_turn  else False
 
-        else:
 
-            #find the action target player,first group skill
-            if skillname in ["NanManRuQin","WanJianQiFa","TaoYuanJieYi","WuGuFengDeng"]:
-                targets = [i for i in range(len(pu.__state__)) if period_list[i] != -2]# -2 means dead
+        if period == 0:
+            #start period
+            active_list = ['GuanXing','LuoShen']
+            if action_skill in active_list:
+                #This two skill can be taken by one step
+                period = 1
+            elif action_skill == "Pass":
+                #action_skill == pass
+                period = 1 
+            else:
+                #In period 0, action can only be skill or Pass
+                print ("error! in period 0, action can onlu be skill or pass!")
+                exit()
+            #In period 0, there is no case to change turn 
+            turn = period_turn  
+        
+        elif period == 1:
+            #fate period
+            active_list = ["ShenShu","QiaoBian","GuiCai"]
+            if action_skill in active_list:
+                #This two skill can be taken by one step
+                period = 2 
+            elif action_skill == "Pass":
+                #action_skill == pass
+                period = 2
+            elif action_skill == "PanDing":
+                period = 2
+            else:
+                #In period 1, action can only be skill, Pass or PanDing
+                print ("error! in period 0, action can onlu be skill ,pass or PanDing!")
+                exit()
 
-                targets_turn = []
-                if skillname in ["NanManRuQin","WanJianQiFa"]:
-                    targets_turn = targets[pu.__period_turn__+1:] + targets[:pu.__period_turn__]
-                else:
-                    targets_turn = targets[pu.__period_turn__:] + targets[:pu.__period_turn__]
+            #In period 1, there is no case to change turn 
+            turn = period_turn  
 
-                #boundary condition
-                if pu.__previous_turn__ = targets_turn[-1]:
-                    turn = period_turn
-                else:
-                    turn = targets_turn[targets_turn.index(pu.__previous_turn__) + 1]
+        elif period == 2:
+            #get card period
+            active_list = ["TuXi","LuoYi"]
+            if action_skill in active_list:
+                #This two skill can be taken by one step
+                period = 3 
+            elif action_skill == "Pass":
+                #action_skill == pass
+                period = 3
+            else:
+                #In period 2, action can only be skill or  Pass
+                print ("error! in period 0, action can onlu be skill or pass!")
+                exit()
+
+            #In period 2, there is no case to change turn 
+            turn = period_turn 
+ 
+        elif period == 3:
+            #put card period
+            #In period 3, assume there is not skill about other !!! check
+            active_list = ["ShenShu","XianTu"]
+
+            if action_skill == "Pass":
+                #action_skill == pass
+                period = 4
+                turn = period_turn
+ 
+            if action_skill in active_list:
+                #Assume this two skill can be taken by one step
+                #In this period, only pass can change period
+                period = 3 
+                turn = period_turn
+
+
+            if action_skill in ["WuZhongShengYou"]:
+                turn = period_turn
+                period = 3 
 
             else:
-            
-                if len(targets) != 1:
-                    print "error"
-                    exit()
-                turn = name_list.index([name for name in name_list if name == targets][0])
+        
+                #find the action target player,first group skill
+                if skillname in ["NanManRuQin","WanJianQiFa","TaoYuanJieYi","WuGuFengDeng"]:
+                    targets_turn = []
+                    if skillname in ["NanManRuQin","WanJianQiFa"]:
+                        targets_turn = targets[period_turn + 1:] + targets[:period_turn]
+                    else:
+                        targets_turn = targets[period_turn:] + targets[:period_turn]
 
-        return turn
+                    #boundary condition
+                    if pu.__pre_turn__ = targets_turn[-1]:
+                        turn = period_turn
+                        period = 3 
+                    else:
+                        turn = targets_turn[targets_turn.index(pu.__pre_turn__) + 1]
+                        period = 3 
+
+                else:
+        
+                    if len(targets) != 1:
+                        print "error! len of targets != 1"
+                        exit()
+                    turn = name_list.index([name for name in name_list if name == targets][0])
+                    period = 3
+
+        elif period == 4:
+            #discard period
+            active_list = ["YingZi","XuanFeng"]
+            if action_skill in active_list:
+                #This two skill can be taken by one step
+                period = 2 
+            elif action_skill == "Pass":
+                #action_skill == pass
+                period = 2
+            elif action_skill == "QiPai":
+                period = 2
+            else:
+                #In period 4, action can only be skill, Pass or DiPai
+                print ("error! in period 0, action can onlu be skill ,pass or PanDing!")
+                exit()
+
+            #In period 1, there is no case to change turn 
+            turn = period_turn 
+ 
+        elif period == 5:
+            #discard period
+            active_list = ["ZhiYan","QieTing"]
+            if action_skill in active_list:
+                #This two skill can be taken by one step
+                period = 0 
+            elif action_skill == "Pass":
+                #action_skill == pass
+                period = 0
+            else:
+                #In period 5, action can only be skill or  Pass
+                print ("error! in period 0, action can onlu be skill ,pass or PanDing!")
+                exit()
+
+            #In period 5, there is no case to change turn
+            turn = targets_turn[targets_turn.index(pu.__pre_turn__) + 1] 
+
+        return period,turn
+        
+    
+    @classmethod
+    def change_state(self, action, pu):
+        #note
+
+        #The below list of element should be changed in skill function
+
+        #self.private_state.__keep_cards__##change it through .add
+        #self.person_state.__hand_cards__ ##change it through .add
+        #self.public_state.__num_discard_cards__##change it through .add .del
+        #self.public_state.__num_discard_cards__##change it through .add .del
+        #self.public_state.__num_deposit_cards__##change it through .add .del
+        #self.public_state.__num_deposit_cards__##change it through .add .del
+        #self.public_state.__num_equipment_cards__##change it through .add .del
+        #self.public_state.__num_equipment_cards__##change it through .add .del 
+        #self.public_state.__num_fate_zone_cards__##change it through .add .del
+        #self.public_state.__num_fate_zone_cards__##change it through .add .del
+        #state : hp attack defend 
+
+        #The below list of element should be changed in change_state function
+
+        #self.public_state.__num_hand_cards__
+        #self.public_state.__num_keep_cards__
+        #self.public_state.__terminal__         
+        #self.public_state.__previous_id__   
+        #self.public_state.__previous_action__
+        #self.public_state.__lord_id__             
+        #self.public_state.__num_players__        
+        #self.public_state.__num_discard_cards__   
+        #self.public_state.__num_deposit_cards__   
+        #self.public_state.__num_equipment_cards__ 
+        #self.public_state.__num_fate_zone_cards__ 
+        #self.public_state.__num_hand_cards__      
+        #self.public_state.__num_keep_cards__    
+        #self.public_state.__turn__             
+        #self.public_state.__previous_turn__ 
+        #self.public_state.__state__   period
+        
+        period,turn = cal_period_turn(action,pu)
+        #change state
+        for index in range(len(self.public_state.__state__)):
             
+            if self.public_state.__state__[index]['hp'] <= 0:
+                self.public_state.__state__[index]['period'] = -2:
+            
+            if turn == index:
+                self.public_state.__state__[turn]['period'] == period
+            elif self.public_state.__state__[index]['period'] >= 0:
+                self.public_state.__state__[index]['period'] = -1:
+                
+        #change period and turn
+        self.public_state.__turn__  = turn
+        
+                     
+        self.public_state.__num_hand_cards__         = [len(self.person_states[i].__hand_cards__) for i in range(self.public_state.__num_players)]
+        self.public_state.__num_keep_cards__         = len(self.private_state.__keep_cards__)    
+        #self.public_state.__terminal__              = 
+        #self.public_state.__previous_id__   
+        #self.public_state.__previous_action__
+        self.public_state.__num_discard_cards__      = len(self.public_state.__discard_cards__)   
+        self.public_state.__num_deposit_cards__      = len(self.public_state.__deposit_cards__)     
+        self.public_state.__num_equipment_cards__    = [len(self.public_states[i].__equipment_cards__) for i in range(self.public_state.__num_players)] 
+        self.public_state.__num_fate_zone_cards__    = [len(self.public_states[i].__fate_zone_cards__) for i in range(self.public_state.__num_players)]
+        #self.public_state.__previous_turn__ 
+        
+        
+
     @classmethod
     def is_ask_wuxie(self, action, pu, pe):
         # calculate the condition of asking WuXieKeJi
@@ -309,13 +494,26 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
  
     @classmethod
-    def available_actions(cls, public_state, person_state):
-
+    def available_actions(cls, pu, pe, action):
+        #generate avaliable action
         available_actions   = dict()
+        #some element that affect the avaliable action
+        name_list       = [p['name'] for p in pu.__state__]
+        period_list     = [p['period'] for p in pu.__state__]  
+        turn            = pu.__turn__
+        hero_name       = name_list[turn]
+        hero_period     = pu.__state__[turn]['period'] 
+        hero_hp         = pu.__state__[turn]['hp']
+        hero_sex        = pu.__state__[turn]['sex']
+        skill_name      = action.__skill__
 
-        '''
-        
-        '''
+        cards           = pe[turn].__hand_cards__ 
+
+        if hero_period == 0 and hero_name == "ZhuGeLiang":
+            avaliable_actions.append(ThreeKingAction.lookup('Pass'))
+            avaliable_actions.append(ThreeKingAction.lookup('GuanXing'))
+ 
+
         return available_actions
 
     @classmethod
