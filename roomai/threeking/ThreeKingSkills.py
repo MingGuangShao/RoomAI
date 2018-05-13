@@ -27,6 +27,11 @@ def take_action(pu,pr,pes,action):
         globals().get_str(skill_name)(pu,pr,pes,card,targets,targets_zones,target_cards)
 '''
 
+def Pass(pu, pr, pes):
+    '''
+    '''
+    pass
+
 def Sha(pu, pr, pes, card, targets):
     '''
     '''
