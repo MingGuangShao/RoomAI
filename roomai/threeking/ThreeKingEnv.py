@@ -14,6 +14,7 @@ logger = roomai.get_logger()
 
 player_info = {'LiuBei':(4,1,['RenDe','JiJiang']),'MaChao':(4,1,['MaShu','TieQi']),'ZhaoYun':(4,1,['LongDan','YaJiao']),'SiMaYi':(3,1,['FanKui','GuiCai']),'ZhangLiao':(4,1,['TuXi']),'XuChu':(4,1,['LuoYi']),'XiaHouDun':(4,1,['GangLie','QingJian']),'SunSHangXiaNG':(3,0,['JieYin','XiaoJi'])}
 
+action_history = ['']
 
 class ThreeKingEnv(roomai.common.AbstractEnv):
     '''
@@ -85,7 +86,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         self.public_state.__terminal__              = False
 
         self.public_state.__previous_id__           = -1#previous id and action used in skill
-        self.public_state.__previous_action__       = None#previous id and action used in skill
+        self.public_state.__previous_action__       = ThreeKingAction.lookup('')#previous id and action used in skill
         self.public_state.__lord_id__               = [i  for i in range(self.__params__['num_players'])  if self.__params__['players_info'][i][1] == 'lord'][0]
         self.public_state.__num_players__           = self.__params__["num_players"]
         self.public_state.__num_discard_cards__     = 0
@@ -97,7 +98,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
         # init self.public_state.__turn__        
         self.public_state.__turn__                  = self.public_state.__lord_id__
-        self.public_state.__previous_turn__         = self.public_state.__lord_id__#previous turn record the turn before breaked
+        #self.public_state.__previous_turn__         = self.public_state.__lord_id__#previous turn record the turn before breaked
 
         # init self.public_state.__state__
         for info in self.__params__["players_info"]:
@@ -110,7 +111,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             defend          = 1 #defend_distance
             skill           = self.player[name][2]
             
-            tmp             = {'name':name,'period':period,'hp':hp,'max_hp','sex':sex,'attack':attack,'defend':defend,'skill':skill}
+            tmp             = {'name':name,'period':period,'hp':hp,'max_hp':max_hp,'sex':sex,'attack':attack,'defend':defend,'skill':skill}
 
             self.public_state.__state__.append(tmp)
             
@@ -141,7 +142,10 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             raise ValueError("The (%s) is an invalid action " % (action.key))
        
         self.take_action(pu,pr,pes,action)# action is an object
-        self.change_state(pu,action)#implement you code here!
+        self.public_state, self.person_states, self.private_state = self.change_state(action,pu,pes,pr)#implement you code here!
+        
+        #record history
+        action_history.append(action)
     
         infos = self.__gen_infos__()    
         return infos, self.public_state, self.person_states, self.private_state
@@ -166,9 +170,9 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             turn    = public_state.turn
             action  = players[turn].take_action()
             #For Unit Test
-            person_states[turn].__add_card__(ThreeKingPokerCard.lookup('SHA_7_spade_0'))
-            public_state.__num_hand_cards__        = [len(p.hand_cards) for p in person_states]
-            public_state.__num_keep_cards__        = len(private_state.keep_cards)
+            #person_states[turn].__add_card__(ThreeKingPokerCard.lookup('SHA_7_spade_0'))
+            #public_state.__num_hand_cards__        = [len(p.hand_cards) for p in person_states]
+            #public_state.__num_keep_cards__        = len(private_state.keep_cards)
 
             # For Unit Test 
             print "BEFORE FORWARD"
@@ -178,10 +182,10 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
             
             print " "
             print "AFTER FORWARD"
-            c = private_state.__keep_cards__.pop() ## For Unit Test
-            public_state.__num_hand_cards__        = [len(p.hand_cards) for p in person_states]
-            public_state.__num_keep_cards__        = len(private_state.keep_cards)
-            public_state.__num_discard_cards__        = len(public_state.discard_cards)
+            #c = private_state.__keep_cards__.pop() ## For Unit Test
+            #public_state.__num_hand_cards__        = [len(p.hand_cards) for p in person_states]
+            #public_state.__num_keep_cards__        = len(private_state.keep_cards)
+            #public_state.__num_discard_cards__        = len(public_state.discard_cards)
             ThreeKingEnv.print_info(env.__params__,public_state, person_states, private_state)
 
             for i in range(env.__params__["num_players"]):
@@ -235,17 +239,17 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         period_list = [p['period'] for p in pu.__state__]   #The period before change state, -2 means dead, -1 means wait
         name_list = [p['name'] for p in pu.__state__]       #All hero names in public state
         targets = [i for i in range(len(pu.__state__)) if period_list[i] != -2]#Index the hero aliving
-        period_turn = period_list.index([i for i in peroid_list if i > 0][0])#index of hero has the period
+        period_turn = period_list.index([i for i in period_list if i >= 0][0])#index of hero has the period
         pre_turn =  pu.__turn__
 
         skill_name = action.__skill__
         #First change the hero's period
         #check
-        assert len(targets) > 2 and len([i for i in period_list if i > 0]) == 1 
+        assert len(targets) > 2 and len([i for i in period_list if i >= 0]) == 1 
     
-        period  = pu.__state__[period_turn]['period']   #Thre period of hero before change state
+        period  = pu.__state__[period_turn]['period']   #The period of hero before change state
         hero_skill   = pu.__state__[period_turn]['skill']    #Assume hero only have one skill
-        action_skill   = action.__skill__    #Assume hero only have one skill
+        action_skill   = action.__skill__
 
         # if the period_turn the same as the turn before change state
         #same_turn = True if period_turn == pre_turn  else False
@@ -262,7 +266,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                 period = 1 
             else:
                 #In period 0, action can only be skill or Pass
-                print ("error! in period 0, action can onlu be skill or pass!")
+                print ("error! in period 0, action can only be skill or pass!")
                 exit()
             #In period 0, there is no case to change turn 
             turn = period_turn  
@@ -280,7 +284,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                 period = 2
             else:
                 #In period 1, action can only be skill, Pass or PanDing
-                print ("error! in period 0, action can onlu be skill ,pass or PanDing!")
+                print ("error! in period 1, action can only be skill ,pass or PanDing!")
                 exit()
 
             #In period 1, there is no case to change turn 
@@ -297,7 +301,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                 period = 3
             else:
                 #In period 2, action can only be skill or  Pass
-                print ("error! in period 0, action can onlu be skill or pass!")
+                print ("error! in period 2, action can only be skill or pass!")
                 exit()
 
             #In period 2, there is no case to change turn 
@@ -322,7 +326,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
             if action_skill in ["WuZhongShengYou"]:
                 turn = period_turn
-                period = 3 
+                period = 3
 
             else:
         
@@ -335,11 +339,11 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                         targets_turn = targets[period_turn:] + targets[:period_turn]
 
                     #boundary condition
-                    if pu.__pre_turn__ = targets_turn[-1]:
+                    if pu.__turn__ == targets_turn[-1]:
                         turn = period_turn
                         period = 3 
                     else:
-                        turn = targets_turn[targets_turn.index(pu.__pre_turn__) + 1]
+                        turn = targets_turn[targets_turn.index(pu.__turn__) + 1]
                         period = 3 
 
                 else:
@@ -363,7 +367,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                 period = 2
             else:
                 #In period 4, action can only be skill, Pass or DiPai
-                print ("error! in period 0, action can onlu be skill ,pass or PanDing!")
+                print ("error! in period 4, action can only be skill ,pass or PanDing!")
                 exit()
 
             #In period 1, there is no case to change turn 
@@ -380,7 +384,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
                 period = 0
             else:
                 #In period 5, action can only be skill or  Pass
-                print ("error! in period 0, action can onlu be skill ,pass or PanDing!")
+                print ("error! in period 5, action can only be skill ,pass or PanDing!")
                 exit()
 
             #In period 5, there is no case to change turn
@@ -390,21 +394,17 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         
     
     @classmethod
-    def change_state(self, action, pu):
+    def change_state(self, action, pu,pe,private):
         #note
 
         #The below list of element should be changed in skill function
 
         #self.private_state.__keep_cards__##change it through .add
         #self.person_state.__hand_cards__ ##change it through .add
-        #self.public_state.__num_discard_cards__##change it through .add .del
-        #self.public_state.__num_discard_cards__##change it through .add .del
-        #self.public_state.__num_deposit_cards__##change it through .add .del
-        #self.public_state.__num_deposit_cards__##change it through .add .del
-        #self.public_state.__num_equipment_cards__##change it through .add .del
-        #self.public_state.__num_equipment_cards__##change it through .add .del 
-        #self.public_state.__num_fate_zone_cards__##change it through .add .del
-        #self.public_state.__num_fate_zone_cards__##change it through .add .del
+        #self.public_state.__discard_cards__##change it through .add .del
+        #self.public_state.__deposit_cards__##change it through .add .del
+        #self.public_state.__equipment_cards__##change it through .add .del
+        #self.public_state.__fate_zone_cards__##change it through .add .del
         #state : hp attack defend 
 
         #The below list of element should be changed in change_state function
@@ -426,34 +426,41 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         #self.public_state.__previous_turn__ 
         #self.public_state.__state__   period
         
-        period,turn = cal_period_turn(action,pu)
+        period,turn = self.cal_period_turn(pu,action)
         #change state
-        for index in range(len(self.public_state.__state__)):
+        for index in range(len(pu.__state__)):
             
-            if self.public_state.__state__[index]['hp'] <= 0:
-                self.public_state.__state__[index]['period'] = -2:
+            if pu.__state__[index]['hp'] <= 0:
+                pu__state__[index]['period'] = -2
             
             if turn == index:
-                self.public_state.__state__[turn]['period'] == period
-            elif self.public_state.__state__[index]['period'] >= 0:
-                self.public_state.__state__[index]['period'] = -1:
+                pu.__state__[turn]['period'] == period
+            elif pu.__state__[index]['period'] >= 0:
+                pu.__state__[index]['period'] = -1
                 
-        #change period and turn
-        self.public_state.__turn__  = turn
-        
                      
-        self.public_state.__num_hand_cards__         = [len(self.person_states[i].__hand_cards__) for i in range(self.public_state.__num_players)]
-        self.public_state.__num_keep_cards__         = len(self.private_state.__keep_cards__)    
-        #self.public_state.__terminal__              = 
-        #self.public_state.__previous_id__   
-        #self.public_state.__previous_action__
-        self.public_state.__num_discard_cards__      = len(self.public_state.__discard_cards__)   
-        self.public_state.__num_deposit_cards__      = len(self.public_state.__deposit_cards__)     
-        self.public_state.__num_equipment_cards__    = [len(self.public_states[i].__equipment_cards__) for i in range(self.public_state.__num_players)] 
-        self.public_state.__num_fate_zone_cards__    = [len(self.public_states[i].__fate_zone_cards__) for i in range(self.public_state.__num_players)]
+        pu.__num_hand_cards__         = [len(pe[i].__hand_cards__) for i in range(pu.__num_players__)]
+        pu.__num_keep_cards__         = len(private.__keep_cards__)    
+        pu.__terminal__               = self.is_terminal(pu) 
+        pu.__previous_id__            = pu.__turn__
+        pu.__previous_action__        = action_history[-1]
+        pu.__num_discard_cards__      = len(pu.__discard_cards__)   
+        pu.__num_deposit_cards__      = len(pu.__deposit_cards__)     
+        #pu.__num_equipment_cards__    = [len(pu.__equipment_cards__[i]) for i in range(pu.__num_players__)] 
+        #pu.__num_fate_zone_cards__    = [len(pu.__fate_zone_cards__[i]) for i in range(pu.__num_players__)]
         #self.public_state.__previous_turn__ 
         
+        #change period and turn
+        pu.__turn__  = turn
+
+        return pu,pe,private
+
         
+    @classmethod
+    def is_terminal(self, pu):
+        #is terminal
+        return False
+
 
     @classmethod
     def is_ask_wuxie(self, action, pu, pe):
@@ -494,7 +501,7 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
 
  
     @classmethod
-    def available_actions(cls, pu, pe, action):
+    def available_actions(cls, pu, pe):
         #generate avaliable action
         available_actions   = dict()
         #some element that affect the avaliable action
@@ -505,24 +512,40 @@ class ThreeKingEnv(roomai.common.AbstractEnv):
         hero_period     = pu.__state__[turn]['period'] 
         hero_hp         = pu.__state__[turn]['hp']
         hero_sex        = pu.__state__[turn]['sex']
+        action          = pu.__previous_action__
         skill_name      = action.__skill__
 
-        cards           = pe[turn].__hand_cards__ 
+        cards           = pe.__hand_cards__ 
 
         if hero_period == 0 and hero_name == "ZhuGeLiang":
-            avaliable_actions.append(ThreeKingAction.lookup('Pass'))
-            avaliable_actions.append(ThreeKingAction.lookup('GuanXing'))
+            available_actions[ThreeKingAction.lookup('Pass').__key__] = ThreeKingAction.lookup('Pass').__key__
+            available_actions[ThreeKingAction.lookup('GuanXing').__key__] = ThreeKingAction.lookup('GuanXing').__key__
+        else:
+            available_actions[ThreeKingAction.lookup('Pass').__key__] = ThreeKingAction.lookup('Pass').__key__
  
-
         return available_actions
+
 
     @classmethod
     def print_info(self,params,pu,pe,pr):
+
+        print ("n_cards_discard:   ", pu.__num_discard_cards__)
+        print ("n_cards_private:   ", pu.__num_keep_cards__)
+        print (" ")
+        for i in range(pu.__num_players__):
+            
+            state               = pu.__state__[i]
+            pe_role             = pe[i].__role__
+            pe_cards            = pe[i].__hand_cards_key__
+            n_cards             = pu.__num_hand_cards__[i]
+            
+            #print all the info
+            print("*************************************************************************************************")
+            print("%s---%s:  "%(state['name'],pe_role)) 
+            print("         **period:%s**   **HP:%s**   **skill:%s**   "%(state['period'],state['hp'],state['skill']))
+            print("         **%s cards**:"%n_cards)
+            print("                    " + pe_cards)
+            print("*************************************************************************************************")
+            print(" ")
     
-        print "players info in env params: ", params["players_info"]
-        print "lord id in public_state: ", pu.__lord_id__
-        print "cards in person_states[0]: ", pe[0].__hand_cards_key__
-        print "num of cards in discard zone: ", pu.__num_discard_cards__
-        print "num of hand cards in public_state: ",pu.__num_hand_cards__
-        print "num of cards in private_state: ",pu.__num_keep_cards__
         
